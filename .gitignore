@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+/GLM/glm/
+/GL/
+/glad.c
+/.idea/
+/cmake-build-debug/
