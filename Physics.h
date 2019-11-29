@@ -4,12 +4,22 @@
 
 #pragma once
 
+#include <glm/vec3.hpp>
 #include "math/Vector.h"
 
-using Point3D = AKMath::Vector3D;
-using Velocity3D = AKMath::Vector3D;
-using Acceleration3D = AKMath::Vector3D;
+//using Point = AKMath::Vector3D;
+//using Velocity = AKMath::Vector3D;
+//using Acceleration = AKMath::Vector3D;
+//
+//using Force = AKMath::Vector3D;
+//using Torque = AKMath::Vector3D;
 
-using Force3D = AKMath::Vector3D;
-using Torque3D = AKMath::Vector3D;
+
+using Point = glm::vec3;
+using Velocity = glm::vec3;
+using Acceleration = glm::vec3;
+
+using Force = glm::vec3;
+using Torque = glm::vec3;
+
 

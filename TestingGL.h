@@ -14,258 +14,104 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "GLFWWrapper.h"
 #include "Shader.h"
+#include "ModelData.h"
+#include "Camera.h"
+#include "Renderer.h"
 
 
 
-using namespace std;
-
-float triangleVertices[] = {
-        //location then color
-        -0.5f,-0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-         0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
-         0.5f,-0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
-};
-
-float boxVerticesColors[36*6];
-
-glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  5.0f, -15.0f),
-        glm::vec3(-1.5f, -2.2f, -2.5f),
-        glm::vec3(-3.8f, -2.0f, -12.3f),
-        glm::vec3( 2.4f, -0.4f, -3.5f),
-        glm::vec3(-1.7f,  3.0f, -7.5f),
-        glm::vec3( 1.3f, -2.0f, -2.5f),
-        glm::vec3( 1.5f,  2.0f, -2.5f),
-        glm::vec3( 1.5f,  0.2f, -1.5f),
-        glm::vec3(-1.3f,  1.0f, -1.5f)
-};
-
-void createVertex(glm::vec3 v, int vertex){
-    float* ptr = &boxVerticesColors[vertex*6];
-    //write to this
-    ptr[0] = v.x/3;
-    ptr[1] = v.y/3;
-    ptr[2] = v.z/3;
-
-    for(int i=3;i<=6;i++){
-        ptr[i] = ((double) rand() / (RAND_MAX));
-    }
-}
-void createRandomColoredBox(){
-    int vertex=0;
-
-    for(int i=0;i<3;i++) {
-        glm::vec3 center(0.0);
-        for (int j = -1; j <= 1; j+=2) {
-            //per face
-            center[i] = (float) j;
-            float p1= -1, p2= -1;
-            for(int k=0;k<3;k++){
-                if(i==k){
-                    continue;
-                }
-                if(p1== -1){
-                    p1 = k;
-                }
-                else{
-                    p2 =k;
-                }
-            }
-            //now vary p1, p2 from -1 to 1
-            glm::vec3 vertices[4];
-            int vi=0;
-            for(int v1=-1;v1<=1;v1+=2){
-                for(int v2=-1;v2<=1;v2+=2){
-                    glm::vec3 v = center;
-                    v[p1] = (float) v1;
-                    v[p2] = (float) v2;
-                    vertices[vi++] = v;
-                }
-            }
-            createVertex(vertices[0], vertex++);
-            createVertex(vertices[1], vertex++);
-            createVertex(vertices[2], vertex++);
-            createVertex(vertices[1], vertex++);
-            createVertex(vertices[2], vertex++);
-            createVertex(vertices[3], vertex++);
-
-        }
-    }
-}
-
-void frameBufferSizeCallback(GLFWwindow* window, int width, int height){
-    glViewport(0,0,width,height);
-}
-void errorCallback(int error, const char* description){
-    cerr<<"GLFW Error "<<error<<": "<<description<<endl;
-}
-
-
-void processInputs(GLFWwindow* window){
+void processInputs(GLFWwindow* window, Camera& camera){
     if(glfwGetKey(window,GLFW_KEY_ESCAPE) == GLFW_PRESS){
         glfwSetWindowShouldClose(window, true);
     }
-    if(glfwGetKey(window,GLFW_KEY_SPACE) == GLFW_PRESS){
-        cout<<"space"<<endl;
+
+    float dt = 0.1;
+    if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS){
+        camera.move(FORWARD, dt);
     }
+    if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS){
+        camera.move(BACKWARD, dt);
+    }
+    if(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS){
+        camera.move(LEFTWARD, dt);
+    }
+    if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS){
+        camera.move(RIGHTWARD, dt);
+    }
+    if(glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS){
+        camera.move(UPWARD, dt);
+    }
+    if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS){
+        camera.move(DOWNWARD, dt);
+    }
+
+    double xPos, yPos;
+    glfwGetCursorPos(window, &xPos, &yPos);
+
+    static double lastXPos = xPos, lastYPos = yPos;
+
+    double xOffset = xPos- lastXPos;
+    double yOffset = yPos- lastYPos;
+
+    camera.look(xOffset, yOffset);
+
+    lastXPos = xPos;
+    lastYPos = yPos;
 }
 
+
+
 void testGL(){
-    createRandomColoredBox();
+    myGLFWInit();
+    GLFWwindow* window = myGLFWCreateWindow();
 
-    glfwSetErrorCallback(errorCallback);
-    glfwInit();
+    Shader basicShader("resources/shaders/basic.shader");
+    ModelData teapotModel("resources/models/teapot.obj");
+    ModelData squareModel("resources/models/square.obj");
+    ModelData cubeModel("resources/models/cube.obj");
+    ModelData arrowModel("resources/models/arrow.obj");
 
-    GLFWwindow* window = glfwCreateWindow(500,500,"window title",nullptr,nullptr);
-    if(window==nullptr){
-        cout<<"failed to create window"<<endl;
-        glfwTerminate();
-        return;
-    }
-    glfwMakeContextCurrent(window);
+    Camera camera(glm::vec3(0.0,0.0,15.0),glm::vec3(0.0,0.0,-1.0),glm::vec3(0.0,1.0,0.0));
 
-    int gladLoadSucess = gladLoadGL();
-
-    if(gladLoadSucess==0){
-        cout<<"failed to load with glad"<<endl;
-        glfwTerminate();
-        return;
-    }
-    frameBufferSizeCallback(window, 500,500);
-    glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
-
-    cout<< glGetString(GL_VERSION)<<endl;
-    cout<< glGetString ( GL_SHADING_LANGUAGE_VERSION )<<endl;
-
-    ShaderProgram sp("basic.shader");
-    ShaderProgram sp2("lol.shader");
-
-    //vertex buffer object
-    unsigned int VBOid;
-    glGenBuffers(1, &VBOid);
-
-    // 0. copy our vertices array in a buffer for OpenGL to use
-    glBindBuffer(GL_ARRAY_BUFFER, VBOid);
-    glBufferData(GL_ARRAY_BUFFER,sizeof(triangleVertices), triangleVertices, GL_STATIC_DRAW);
+    Renderer renderer(true, false);
 
 
-    unsigned int boxVBO;
-    glGenBuffers(1, &boxVBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, boxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(boxVerticesColors), boxVerticesColors, GL_STATIC_DRAW);
-
-
-    int vPosLocation = glGetAttribLocation(sp.shaderProgram(),"vPos");
-    int vColLocation = glGetAttribLocation(sp.shaderProgram(),"vCol");
-    int sinValLocation = glGetUniformLocation(sp.shaderProgram(), "sinVal");
-    int rotMatLocation = glGetUniformLocation(sp.shaderProgram(), "rotMat");
-
-
-
-    vPosLocation = glGetAttribLocation(sp2.shaderProgram(),"vPos");
-    vColLocation = glGetAttribLocation(sp2.shaderProgram(),"vCol");
-
-
-
-    glEnable(GL_DEPTH_TEST);
-
+    double lastTime = glfwGetTime();
+    basicShader.bind();
     while(!glfwWindowShouldClose(window)) {
+        //SET VIEW PORT
         int width, height;
         glfwGetFramebufferSize(window, &width, &height);
-        glViewport(0, 0, width, height);
+        renderer.clear(width, height, basicShader);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+        //TIME
+        double currentTime = glfwGetTime();
+        double dt = currentTime - lastTime;
+        lastTime = currentTime;
 
+        //set uniforms
+        basicShader.setUniform("view", camera.computeViewMatrix());
+        basicShader.setUniform("projection", camera.computePerspectiveProjectionMatrix((float)width/height));
 
-        float time = glfwGetTime();
-        float greenVal = (sin(time)+1.0f)/2.0f;
+        glm::mat4 model(1.0f);
+        //model = glm::rotate(model, 100*glm::radians((float)currentTime), glm::vec3(0.0,1.0,0.0));
 
-        glm::mat4 model(1.0f), view(1.0f), projection(1.0f);
-        //model = glm::translate(model,glm::vec3(0.0,0.0,0.0));
-        glm::vec4 eye (10.0,0.0,0.0,1.0);
-        glm::mat4 eyeMat = glm::rotate(glm::mat4(1.0),(float)time*glm::radians(50.0f),glm::vec3(0.0f,1.0f,0.0f));
-        eye = eyeMat*eye;
-        glm::vec3 eye3 = glm::vec3(eye.x,eye.y,eye.z);
-        view = glm::lookAt(eye3,glm::vec3(0.0f),glm::vec3(0.0f,1.0,0.0));
-        //view = glm::translate(view, glm::vec3(0.0f, 0.0f, -10.0f));
+        basicShader.setUniform("model", model);
+        basicShader.setUniform("solidColor", glm::vec4(1.0,0.0,0.0,1.0));
 
-        projection = glm::perspective(glm::radians(45.0f), (float) width / height, 0.1f, 100.0f);
-
-        sp.glUseThisProgram();
-
-//        int vertexColorLocation = glGetUniformLocation(sp.shaderProgram(), "ourColor");
-//        glUniform4f(vertexColorLocation,0.0f, greenVal, 0.0f, 1.0f);
-
-//        glBindBuffer(GL_ARRAY_BUFFER,VBOid);
-//        glVertexAttribPointer(vPosLocation,3,GL_FLOAT,GL_FALSE,6*sizeof(float), (void*) 0);
-//        glEnableVertexAttribArray(vPosLocation);
-//        glVertexAttribPointer(vColLocation,3,GL_FLOAT,GL_FALSE,6*sizeof(float), (void*) (3*sizeof(float)));
-//        glEnableVertexAttribArray(vColLocation);
-//
-//        glUniform1f(sinValLocation,greenVal);
-
-
-//        mat4x4 rotMat;
-//        mat4x4_identity(rotMat);
-//        mat4x4_rotate_Z(rotMat, rotMat, time);
-//
-//        glUniformMatrix4fv(rotMatLocation, 1, GL_FALSE, (const GLfloat*) rotMat);
-
-
-        sp2.glUseThisProgram();
-
-        glBindBuffer(GL_ARRAY_BUFFER, boxVBO);
-        glVertexAttribPointer(vPosLocation,3,GL_FLOAT,GL_FALSE,6* sizeof(float), (void*)0);
-        glEnableVertexAttribArray(vPosLocation);
-        glVertexAttribPointer(vColLocation,3,GL_FLOAT,GL_FALSE,6* sizeof(float), (void*)(3*sizeof(float)));
-        glEnableVertexAttribArray(vColLocation);
-
-
-        model = glm::rotate(model,(float)time * glm::radians(50.0f),glm::vec3(1.0,1.0,1.0));
-
-        int modelLoc = glGetUniformLocation(sp2.shaderProgram(), "model");
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        int viewLoc = glGetUniformLocation(sp2.shaderProgram(), "view");
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        int projLoc = glGetUniformLocation(sp2.shaderProgram(), "projection");
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-        //glBindVertexArray(VAOid);
-
-
-
-
-        //render triangles, start at 0 index, 3 vertices to render
-//        glDrawArrays(GL_TRIANGLES,0,3);
-//        glDrawArrays(GL_TRIANGLES,0,36);
-
-        for(int i=0;i<sizeof(cubePositions)/sizeof(glm::vec3);i++){
-            model = glm::mat4(1.0);
-            model = glm::translate(model, cubePositions[i]);
-            model = glm::rotate(model,(float)i*time * glm::radians(50.0f),glm::vec3(1.0,1.0,1.0));
-
-            int modelLoc = glGetUniformLocation(sp2.shaderProgram(), "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            int viewLoc = glGetUniformLocation(sp2.shaderProgram(), "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-            int projLoc = glGetUniformLocation(sp2.shaderProgram(), "projection");
-            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            //glDrawArrays(GL_LINES,0,36);
-        }
-
-
+        //teapotModel.draw(basicShader);
+        //cubeModel.draw(basicShader);
+        arrowModel.draw(basicShader);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
 
-        processInputs(window);
+        processInputs(window, camera);
     }
 
     glfwTerminate();
 }
+
+

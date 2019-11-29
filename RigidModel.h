@@ -6,53 +6,44 @@
 
 #include <iostream>
 #include <vector>
-
-#include "math/Vector.h"
-#include "math/Quaternion.h"
+#include <glm/vec3.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 
 class PointMass {
 private:
-    double mMass;
-    AKMath::Vector3D mR;
+    float mMass;
+    glm::vec3 mR;
 public:
-    PointMass(const double mass){
+    PointMass(const float mass){
         this->mMass = mass;
     }
-    PointMass(const double mass, const AKMath::Vector3D& r) : PointMass(mass){
+    PointMass(const float mass, const glm::vec3& r) : PointMass(mass){
         this->mR = r;
     }
-
-    inline double& mass() const {
-        return (double&) mMass;
+    inline float& mass() const {
+        return (float&) mMass;
     }
-    inline AKMath::Vector3D& r() const {
-        return (AKMath::Vector3D&) mR;
+    inline glm::vec3& r() const {
+        return (glm::vec3&) mR;
     }
-
-    friend std::ostream &operator<<(std::ostream &out, const PointMass &pointMass);
 };
 
-std::ostream &operator<<(std::ostream &out, const PointMass &pointMass){
-    out<<"PointMass: ";
-    out << "m = " << pointMass.mMass << ", ";
-    out<<"r = "<<pointMass.mR;
-    return out;
-}
 
 class RigidModel {
 private:
     std::vector<PointMass> mPointMasses;
-    AKMath::Vector3D mR;
-    AKMath::Quaternion mOrientation;
+    glm::vec3 mR;
+    glm::quat mOrientation;
 
-    double mM = 0;
-    double mI = 0;
+    float mM = 0;
+    float mI = 0;
 
     bool establishedModel = false;
 public:
 
-    RigidModel(): mOrientation(AKMath::i, 0.0){
+    RigidModel(): mOrientation(1.0,0.0,0.0,0.0){
     }
 
     template <size_t M>
@@ -64,12 +55,12 @@ public:
     void establishModel(){
         establishedModel = true;
         //center of mass;
-        AKMath::Vector3D cm(0.0);
+        glm::vec3 cm(0.0);
 
         for(const PointMass& pm: mPointMasses){
-            AKMath::Vector3D relR = pm.r();
+            glm::vec3 relR = pm.r();
 
-            double m = pm.mass();
+            float m = pm.mass();
             mM += m;
 
             relR *= m;
@@ -79,12 +70,13 @@ public:
         cm/=mM;
 
         for(PointMass& pm: mPointMasses){
-            AKMath::Vector3D& pmR = pm.r();
-            double& m = pm.mass();
+            glm::vec3& pmR = pm.r();
+            float& m = pm.mass();
 
             pmR -= cm;
 
-            mI += m * magnitudeSqr(pmR);
+            float mag = glm::length(pmR);
+            mI += m * mag*mag;
 
         }
         mR += cm;
@@ -94,30 +86,12 @@ public:
     std::vector<PointMass>& pointMasses() const{
         return (std::vector<PointMass>&) mPointMasses;
     }
-    AKMath::Vector3D& r() const{
-        return (AKMath::Vector3D&) mR;
+    glm::vec3& r() const{
+        return (glm::vec3&) mR;
     }
-    AKMath::Quaternion& orientation() const{
-        return (AKMath::Quaternion&) mOrientation;
+    glm::quat& orientation() const{
+        return (glm::quat&) mOrientation;
     }
 
 };
 
-
-std::ostream & operator<<(std::ostream &out, const RigidModel &rigidModel) {
-    out << "RigidModel: ";
-    out << '[';
-    int N = rigidModel.pointMasses().size();
-    for (int i = 0; i < N; i++) {
-        out<<rigidModel.pointMasses()[i];
-        if(i<N-1){
-            out<<", "<<std::endl;
-        }
-    }
-    out << ']';
-    return out;
-}
-
-
-using PointMass3D = PointMass;
-using RigidModel3D = RigidModel;

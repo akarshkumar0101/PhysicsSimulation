@@ -13,21 +13,21 @@
 #include <glad/glad.h>
 
 
-struct ShaderProgramSouce {
+struct ShaderProgramSource {
     std::string vertexShader;
     std::string fragmentShader;
 };
 
 
-class ShaderProgram {
+class Shader {
 private:
     const unsigned int mVertexShader;
     const unsigned int mFragmentShader;
-    const unsigned int mShaderProgram;
+    const unsigned int mShaderProgramID;
 
     const std::string mShaderSourceFilePath;
 
-    ShaderProgramSouce mSps;
+    ShaderProgramSource mSps;
 
     void loadShadersSource() {
         std::ifstream fileStream(mShaderSourceFilePath);
@@ -56,24 +56,24 @@ private:
     }
 
 public:
-    ShaderProgram(const std::string &shaderSourceFilePath) : mVertexShader(glCreateShader(GL_VERTEX_SHADER)),
-                                                             mFragmentShader(glCreateShader(GL_FRAGMENT_SHADER)),
-                                                             mShaderProgram(glCreateProgram()),
-                                                             mShaderSourceFilePath(shaderSourceFilePath) {
+    Shader(const std::string &shaderSourceFilePath) : mVertexShader(glCreateShader(GL_VERTEX_SHADER)),
+                                                      mFragmentShader(glCreateShader(GL_FRAGMENT_SHADER)),
+                                                      mShaderProgramID(glCreateProgram()),
+                                                      mShaderSourceFilePath(shaderSourceFilePath) {
         this->loadShadersSource();
 
         const char *vsSource = mSps.vertexShader.c_str();
         const char *fsSource = mSps.fragmentShader.c_str();
 
-        glShaderSource(mVertexShader, 1, &vsSource, NULL);
-        glShaderSource(mFragmentShader, 1, &fsSource, NULL);
+        glShaderSource(mVertexShader, 1, &vsSource, nullptr);
+        glShaderSource(mFragmentShader, 1, &fsSource, nullptr);
 
         glCompileShader(mVertexShader);
         glCompileShader(mFragmentShader);
 
-        glAttachShader(mShaderProgram, mVertexShader);
-        glAttachShader(mShaderProgram, mFragmentShader);
-        glLinkProgram(mShaderProgram);
+        glAttachShader(mShaderProgramID, mVertexShader);
+        glAttachShader(mShaderProgramID, mFragmentShader);
+        glLinkProgram(mShaderProgramID);
 
         checkCompilationLinkingIssues();
 
@@ -88,42 +88,56 @@ public:
         char infoLog[512];
         glGetShaderiv(mVertexShader, GL_COMPILE_STATUS, &successVS);
         glGetShaderiv(mFragmentShader, GL_COMPILE_STATUS, &successFS);
-        glGetProgramiv(mShaderProgram, GL_LINK_STATUS, &successProgram);
+        glGetProgramiv(mShaderProgramID, GL_LINK_STATUS, &successProgram);
         if (!successVS) {
-            glGetShaderInfoLog(mVertexShader, 512, NULL, infoLog);
+            glGetShaderInfoLog(mVertexShader, 512, nullptr, infoLog);
             cerr << "Vertex shader compilation error: " << endl;
             cerr << infoLog << endl;
         }
         if (!successFS) {
-            glGetShaderInfoLog(mFragmentShader, 512, NULL, infoLog);
+            glGetShaderInfoLog(mFragmentShader, 512, nullptr, infoLog);
             cerr << "Fragment shader compilation error: " << endl;
             cerr << infoLog << endl;
         }
         if (!successProgram) {
-            glGetProgramInfoLog(mShaderProgram, 512, NULL, infoLog);
+            glGetProgramInfoLog(mShaderProgramID, 512, nullptr, infoLog);
             cerr << "Shader Program linking error: " << endl;
             cerr << infoLog << endl;
         }
     }
 
-    void glUseThisProgram() const {
-        glUseProgram(mShaderProgram);
+    void bind() const {
+        glUseProgram(mShaderProgramID);
+    }
+    void unbind() const {
+        glUseProgram(0);
     }
 
-    unsigned int shaderProgram() const{
-        return mShaderProgram;
+    unsigned int shaderProgramID() const{
+        return mShaderProgramID;
     }
 
-    void setUniformFloat(const std::string& name, const float val){
+    void setUniform(const std::string& name, const float val) const {
         glUniform1f(getUniformLocation((name)), val);
     }
-    void setUniformMatrix4fv(const std::string& name, const glm::mat4& mat){
+    void setUniform(const std::string& name, const glm::mat4& mat) const {
         glUniformMatrix4fv(getUniformLocation(name),1, GL_FALSE, glm::value_ptr(mat));
     }
-    int getUniformLocation(const std::string& name){
-        int location = glGetUniformLocation(mShaderProgram, name.c_str());
+    void setUniform(const std::string& name, const glm::vec4& vec) const {
+        glUniform4fv(getUniformLocation(name),1,glm::value_ptr(vec));
+    }
+
+    int getUniformLocation(const std::string& name) const {
+        int location = glGetUniformLocation(mShaderProgramID, name.c_str());
         if(location==-1){
             throw std::string("Invalid name for uniform");
+        }
+        return location;
+    }
+    int getAttribLocation(const std::string name) const{
+        int location = glGetAttribLocation(mShaderProgramID, name.c_str());
+        if(location==-1){
+            throw std::string("Invalid name for attribute");
         }
         return location;
     }

@@ -16,44 +16,44 @@
 class PhysicsSimulation {
 
 private:
-    std::vector<RigidModel3D> mModels;
+    std::vector<RigidModel> mModels;
     std::mutex mut;
 
 
-    Force3D forceAt(const Point3D& point){
-        return Force3D();
+    Force forceAt(const Point& point){
+        return Force();
     }
 
 public:
     PhysicsSimulation(){}
 
-    std::vector<RigidModel3D>& models() const{
-        return (std::vector<RigidModel3D>&) mModels;
+    std::vector<RigidModel>& models() const{
+        return (std::vector<RigidModel>&) mModels;
     }
 
     void update(const double dt){
-        for(RigidModel3D& model: mModels){
+        for(RigidModel& model: mModels){
             updateModel(model,dt);
         }
     }
 
-    void updateModel(RigidModel3D& model, const double dt){
-        Force3D totalForce(0.0);
-        Torque3D totalTorque(0.0);
+    void updateModel(RigidModel& model, const double dt){
+        Force totalForce(0.0);
+        Torque totalTorque(0.0);
 
         for(PointMass& pm: model.pointMasses()){
-            AKMath::Vector3D relR = pm.r();
-            AKMath::Vector3D absR = relR;
+            Point relR = pm.r();
+            Point absR = relR;
 
-            Force3D absForceAtPM = forceAt(absR);
+            Force absForceAtPM = forceAt(absR);
 
             totalForce = totalForce + absForceAtPM;
 
-            Torque3D relTorque = cross(relR, absForceAtPM);
+            Torque relTorque = glm::cross(relR, absForceAtPM);
 
             totalTorque = totalTorque + relTorque;
         }
-        totalTorque = rotate(totalTorque, model.orientation());
+        totalTorque = glm::rotate(model.orientation(),totalTorque);
 
     }
 
