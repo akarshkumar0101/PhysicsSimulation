@@ -107,7 +107,7 @@ public:
     template<class T>
     void addElement(const unsigned int count, const std::string shaderAttributeName);
 
-    void bindVertexAttributesToShader(const Shader& shader) {
+    void bindVertexAttributesToShader(const Shader& shader) const{
         size_t offset = 0;
         for (VertexBufferElement e: mElements) {
             int attribLocation = shader.getAttribLocation(e.shaderAttributeName);

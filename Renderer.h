@@ -75,12 +75,65 @@ public:
         glViewport(0, 0, width, height);
         glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
         if (mAxis) {
+            glm::mat4 model(1.0f);
+            shader.setUniform("model", model);
             drawAxis(shader);
         }
     }
 
+
     void render(const ModelData& modelData, const Shader& shader){
 
+    }
+    glm::vec3 proj(glm::vec3 v, glm::vec3 u){
+        return (glm::dot(u,v)/glm::dot(u,u)) * u;
+    }
+    glm::vec3 perpendicular(glm::vec3 vec){
+        glm::vec3 y(0,1,0);
+        glm::vec3 x(1,0,0);
+
+        glm::vec3 c1 = glm::cross(vec,y);
+        if(glm::length(c1)<.1){
+            glm::vec3 c2 = glm::cross(vec,x);
+            return c2;
+        }
+        else{
+            return c1;
+        }
+    }
+
+    void renderForce(const Force& force, const Point& position, const Shader& shader){
+        float forceMag = glm::length(force);
+        glm::mat4 model(1.0);
+
+//        float yaw = glm::atan(force.y,force.x);
+//        float pitch = glm::asin(force.z);
+//        float roll = 0;
+//        glm::quat q(glm::vec3(yaw,pitch,roll));
+//        glm::mat4 rotate = glm::toMat4(q);
+
+
+        model = glm::translate(model,position);
+
+
+        float scaleXY = std::min(1.0f,forceMag);
+        glm::mat4 scaleZ = glm::scale(glm::mat4(1.0),glm::vec3(scaleXY,scaleXY,forceMag));
+        glm::mat4 toZ = glm::rotate(glm::mat4(1.0), (float) M_PI/2, glm::vec3(0.0,1.0,0.0));
+
+        glm::mat4 rotate = glm::lookAt(glm::vec3(0.0),force,perpendicular(force));
+        rotate = glm::inverse(rotate);
+        model = model*rotate*scaleZ*toZ;
+
+        //model = rotate*model;
+
+
+
+
+
+
+        shader.setUniform("model", model);
+
+        arrowModel->draw(shader);
     }
 
 };

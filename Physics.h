@@ -5,6 +5,7 @@
 #pragma once
 
 #include <glm/vec3.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include "math/Vector.h"
 
 //using Point = AKMath::Vector3D;
@@ -21,5 +22,7 @@ using Acceleration = glm::vec3;
 
 using Force = glm::vec3;
 using Torque = glm::vec3;
+
+using Orientation = glm::quat;
 
 

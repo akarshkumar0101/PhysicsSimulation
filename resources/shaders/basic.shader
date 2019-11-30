@@ -3,14 +3,13 @@
 #version 120
 
 uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 projectionView;
 
 attribute vec3 vPos;
 
 void main()
 {
-    gl_Position = projection * view * model * vec4(vPos, 1.0);
+    gl_Position = projectionView * model * vec4(vPos, 1.0);
 }
 
 #shader fragment

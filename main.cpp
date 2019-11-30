@@ -1,42 +1,33 @@
 #include <iostream>
 
-#include "TestingGL.h"
+#include "Display.h"
+#include "RigidModel.h"
+#include "Simulation.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 int main() {
-
-    testGL();
-
-
-//    std::array<PointMass3D,2> arr = {PointMass(1, Vector3D({0,0,0})),PointMass(1, Vector3D({0,1,0}))};
-//    RigidModel3D model(arr);
-
-//    int width = 500, height = 600;
-//    glm::mat4 proj = glm::perspective(glm::radians(45.0f), (float)width/(float)height, 0.1f, 100.0f);
-//
-//    glm::vec4 point(1,2,3,1);
-//
-//    for(int j=0;j<4;j++){
-//        for(int i=0;i<4;i++){
-//            cout<<proj[j][i]<<" ";
-//        }
-//        cout<<endl;
-//    }
-//    glm::vec4 p2 = proj*point;
-//    for(int i=0;i<4;i++){
-//        cout<<p2[i]<<" ";
-//    }
-//    cout<<endl;
+//    Pose pose(Point(1.0,2.0,3.0), Orientation(glm::vec3(8.0,2.0,3.0)));
 
 
-//    PhysicsSimulation simulation;
+    RigidModel model;
+    model.pointMasses().push_back(PointMass(1.0,Point(1.0,0.0,0.0)));
+    model.pointMasses().push_back(PointMass(1.0,Point(0.0,1.0,0.0)));
+    model.pointMasses().push_back(PointMass(1.0,Point(1.0,1.0,0.0)));
+    model.pointMasses().push_back(PointMass(1.0,Point(2.0,2.0,0.0)));
+    model.establishModel();
+
+    PhysicsSimulation simulation;
+    simulation.models().push_back(model);
 
     //std::thread* thread = simulation.simulateOnThread();
-    //thread->join();
 
+    SimulationDisplay display(simulation);
+    display.startSimulationDisplay();
+
+    //delete thread;
 
     std::cout<<"Exiting program successfully"<<std::endl;
 

@@ -20,9 +20,6 @@ private:
     std::mutex mut;
 
 
-    Force forceAt(const Point& point){
-        return Force();
-    }
 
 public:
     PhysicsSimulation(){}
@@ -30,11 +27,17 @@ public:
     std::vector<RigidModel>& models() const{
         return (std::vector<RigidModel>&) mModels;
     }
+    Force forceAt(const Point& point){
+        //return 0.1f*glm::cross(point, glm::vec3(0,0,1));
+        return Force(1,0,0);
+    }
 
-    void update(const double dt){
+    void step(const double dt){
+        mut.lock();
         for(RigidModel& model: mModels){
             updateModel(model,dt);
         }
+        mut.unlock();
     }
 
     void updateModel(RigidModel& model, const double dt){
@@ -42,7 +45,7 @@ public:
         Torque totalTorque(0.0);
 
         for(PointMass& pm: model.pointMasses()){
-            Point relR = pm.r();
+            Point relR = pm.pose().r();
             Point absR = relR;
 
             Force absForceAtPM = forceAt(absR);
@@ -53,8 +56,9 @@ public:
 
             totalTorque = totalTorque + relTorque;
         }
-        totalTorque = glm::rotate(model.orientation(),totalTorque);
-
+        //totalTorque = glm::rotate(model.pose().orientation(),totalTorque);
+        model.pose().r() += (float)dt *(totalForce/model.mass());
+        //std::cout<<model.pose().r().x<<std::endl;
     }
 
     void simulate(){
@@ -69,7 +73,7 @@ public:
             double dt = time_span.count();
             std::cout << dt << " seconds\n";
 
-            update(dt);
+            step(dt);
             previousFrame = thisFrame;
         }
     }
