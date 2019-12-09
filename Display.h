@@ -92,8 +92,12 @@ private:
         //teapotModel->draw(*basicShader);
 
         for (int i = 0; i < modelDatas.size(); i++) {
+            const RigidModel& model = simulation.models()[i];
             modelDatas[i]->drawModel(simulation.models()[i], *cubeModel, *basicShader);
-            
+            for(PointMass pm: model.pointMasses()){
+                Point r = model.pose().transformation() * glm::vec4(pm.pose().r(),1.0);
+                renderer->renderForce(simulation.forceAt(r), r, *basicShader);
+            }
         }
 
         //Force force(10.0,0.0,0.0);

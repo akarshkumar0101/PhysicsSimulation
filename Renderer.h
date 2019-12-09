@@ -85,9 +85,7 @@ public:
     void render(const ModelData& modelData, const Shader& shader){
 
     }
-    glm::vec3 proj(glm::vec3 v, glm::vec3 u){
-        return (glm::dot(u,v)/glm::dot(u,u)) * u;
-    }
+
     glm::vec3 perpendicular(glm::vec3 vec){
         glm::vec3 y(0,1,0);
         glm::vec3 x(1,0,0);
@@ -101,7 +99,6 @@ public:
             return c1;
         }
     }
-
     void renderForce(const Force& force, const Point& position, const Shader& shader){
         float forceMag = glm::length(force);
         glm::mat4 model(1.0);

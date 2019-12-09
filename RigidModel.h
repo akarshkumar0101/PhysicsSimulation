@@ -13,44 +13,6 @@
 #include "Physics.h"
 
 
-//pose is relative to parent
-class Pose {
-private:
-    //location of object with respect to parent
-    Point mR;
-    //orientation of object with respect to parent
-    Orientation mOrientation;
-public:
-    Pose(Point r, Orientation orientation): mR(r), mOrientation(orientation){
-    }
-    Pose(Point r): mR(r), mOrientation(1.0, glm::vec3(0.0)){
-    }
-    Pose(): mR(0.0), mOrientation(1.0, glm::vec3(0.0)){
-    }
-    Point& r() const{
-        return (Point&) mR;
-    }
-    Orientation& orientation() const{
-        return (Orientation&) mOrientation;
-    }
-
-
-    //returns a transformation to take you from this object's coordinate system to the parent's
-    glm::mat4 transformation(){
-        glm::mat4 trans(1.0);
-        trans = glm::translate(trans, mR);
-        trans = trans * glm::toMat4(mOrientation);
-        return trans;
-    }
-    //returns a transformation to take you from the parent's coordinate system to this object's
-    glm::mat4 inverseTransformation(){
-        glm::mat4 trans(1.0);
-        trans = trans * glm::toMat4(glm::inverse(mOrientation));
-        trans = glm::translate(trans, -mR);
-        return trans;
-    }
-};
-
 class PointMass {
 private:
     float mMass;

@@ -29,7 +29,7 @@ public:
     }
     Force forceAt(const Point& point){
         //return 0.1f*glm::cross(point, glm::vec3(0,0,1));
-        return Force(1,0,0);
+        return Force(point.y,0,0);
     }
 
     void step(const double dt){
@@ -46,7 +46,7 @@ public:
 
         for(PointMass& pm: model.pointMasses()){
             Point relR = pm.pose().r();
-            Point absR = relR;
+            Point absR = model.pose().transformation() * glm::vec4(pm.pose().r(),1.0);
 
             Force absForceAtPM = forceAt(absR);
 

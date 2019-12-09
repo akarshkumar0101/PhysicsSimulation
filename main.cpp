@@ -13,10 +13,8 @@ int main() {
 
 
     RigidModel model;
-    model.pointMasses().push_back(PointMass(1.0,Point(1.0,0.0,0.0)));
     model.pointMasses().push_back(PointMass(1.0,Point(0.0,1.0,0.0)));
-    model.pointMasses().push_back(PointMass(1.0,Point(1.0,1.0,0.0)));
-    model.pointMasses().push_back(PointMass(1.0,Point(2.0,2.0,0.0)));
+    model.pointMasses().push_back(PointMass(1.0,Point(0.0,-1.0,0.0)));
     model.establishModel();
 
     PhysicsSimulation simulation;
