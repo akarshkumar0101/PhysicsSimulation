@@ -22,23 +22,24 @@ unsigned int axisIndices[3][2]={
         {4,5},
 };
 
+unsigned int axisBuffer;
+unsigned int* axisIndicesBuffers = new unsigned int[3];
+
+void initAxis(){
+    glGenBuffers(1, &axisBuffer);
+    glGenBuffers(3, axisIndicesBuffers);
+
+    glBindBuffer(GL_ARRAY_BUFFER, axisBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertices), axisVertices,GL_STATIC_DRAW);
+
+    for(int i=0;i<3;i++){
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, axisIndicesBuffers[i]);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(axisIndices[i]), (void*) axisIndices[i],GL_STATIC_DRAW);
+    }
+}
+
 class Renderer{
 private:
-    unsigned int axisBuffer;
-    unsigned int* axisIndicesBuffers = new unsigned int[3];
-
-    void initAxis(){
-        glGenBuffers(1, &axisBuffer);
-        glGenBuffers(3, axisIndicesBuffers);
-
-        glBindBuffer(GL_ARRAY_BUFFER, axisBuffer);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertices), axisVertices,GL_STATIC_DRAW);
-
-        for(int i=0;i<3;i++){
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, axisIndicesBuffers[i]);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(axisIndices[i]), (void*) axisIndices[i],GL_STATIC_DRAW);
-        }
-    }
     void drawAxis(const Shader& shaderProgram){
         glBindBuffer(GL_ARRAY_BUFFER, axisBuffer);
 

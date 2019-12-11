@@ -16,16 +16,15 @@
 #include <glm/gtx/quaternion.hpp>
 
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
+#include <imgui_impl_opengl2.h>
 #include <imgui_impl_glfw.h>
 
-#include "GLFWWrapper.h"
 #include "Shader.h"
 #include "ModelData.h"
 #include "Camera.h"
 #include "Renderer.h"
 #include "Simulation.h"
-
+#include "Window.h"
 
 
 class SimulationDisplay {
@@ -33,14 +32,14 @@ private:
     Shader *basicShader;
     Camera camera;
     Renderer *renderer;
-    GLFWwindow *window;
+    Window* window;
     PhysicsSimulation& simulation;
     std::vector<ModelData *> modelDatas;
 
 public:
     SimulationDisplay(PhysicsSimulation& simulation):camera(glm::vec3(0.0, 0.0, 15.0), glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, 1.0, 0.0)), simulation(simulation){
-        myGLFWInit();
-        window = myGLFWCreateWindow();
+
+        window = new Window(500,500,"new window dog");
 
         renderer = new Renderer(true, false);
         basicShader = new Shader("resources/shaders/basic.shader");
@@ -56,36 +55,34 @@ public:
         double lastTime = glfwGetTime();
 
 
-        //ImGui::CreateContext();
-        //ImGui_ImplGlfw_InitForOpenGL(window, true);
-
-
-        while (!glfwWindowShouldClose(window)) {
+        while (!window->shouldClose()) {
             double currentTime = glfwGetTime();
             double dt = currentTime - lastTime;
             lastTime = currentTime;
 
+
             render();
             simulation.step(dt);
-
 
             windowEvents();
         }
         destroyModels();
+
+
         glfwTerminate();
     }
 private:
     void windowEvents(){
-        glfwSwapBuffers(window);
+        window->swapBuffers();
         glfwPollEvents();
-
-        processInputs(window, camera);
+        window->makeContextCurrent();
+        processInputs();
     }
 
     void render(){
         //SET VIEW PORT
         int width, height;
-        glfwGetFramebufferSize(window, &width, &height);
+        window->getFramebufferSize(width, height);
 
         basicShader->setUniform("projectionView", camera.computePerspectiveProjectionMatrix((float) width / height) *
                                                  camera.computeViewMatrix());
@@ -114,33 +111,33 @@ private:
         //Force force(10.0,0.0,0.0);
         //renderer.renderForce(force,glm::vec3(0),basicShader);
     }
-    void processInputs(GLFWwindow *window, Camera &camera) {
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, true);
+    void processInputs() {
+        if (window->isKeyPressed(GLFW_KEY_ESCAPE)) {
+            window->setShouldClose(true);
         }
 
         float dt = 0.1;
-        if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        if (window->isKeyPressed(GLFW_KEY_W)) {
             camera.move(FORWARD, dt);
         }
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        if (window->isKeyPressed(GLFW_KEY_S)) {
             camera.move(BACKWARD, dt);
         }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        if (window->isKeyPressed(GLFW_KEY_A)) {
             camera.move(LEFTWARD, dt);
         }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        if (window->isKeyPressed(GLFW_KEY_D)) {
             camera.move(RIGHTWARD, dt);
         }
-        if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+        if (window->isKeyPressed(GLFW_KEY_SPACE)) {
             camera.move(UPWARD, dt);
         }
-        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+        if (window->isKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
             camera.move(DOWNWARD, dt);
         }
 
         double xPos, yPos;
-        glfwGetCursorPos(window, &xPos, &yPos);
+        window->getCursorPosition(xPos,yPos);
 
         static double lastXPos = xPos, lastYPos = yPos;
 
