@@ -8,7 +8,6 @@
 #include <thread>
 #include <mutex>
 
-#include "math/Vector.h"
 #include "RigidModel.h"
 #include "Physics.h"
 

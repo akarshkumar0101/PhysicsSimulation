@@ -20,6 +20,7 @@
 #include "RigidModel.h"
 
 class ModelData {
+
 private:
     std::vector<float> mVertices;
     std::vector<unsigned int> mIndices;

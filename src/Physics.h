@@ -6,7 +6,6 @@
 
 #include <glm/vec3.hpp>
 #include <glm/gtx/quaternion.hpp>
-#include "math/Vector.h"
 
 //using Point = AKMath::Vector3D;
 //using Velocity = AKMath::Vector3D;

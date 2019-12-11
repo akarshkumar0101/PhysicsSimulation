@@ -1,5 +1,10 @@
 .DS_Store
 
+/.idea/
+/cmake-build-debug/
+Libraries/
+
+
 # Prerequisites
 *.d
 
@@ -32,8 +37,3 @@
 *.exe
 *.out
 *.app
-/GLM/
-/GL/
-/glad.c
-/.idea/
-/cmake-build-debug/

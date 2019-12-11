@@ -15,12 +15,18 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
+
 #include "GLFWWrapper.h"
 #include "Shader.h"
 #include "ModelData.h"
 #include "Camera.h"
 #include "Renderer.h"
 #include "Simulation.h"
+
+
 
 class SimulationDisplay {
 private:
@@ -48,6 +54,11 @@ public:
 
     void startSimulationDisplay() {
         double lastTime = glfwGetTime();
+
+
+        //ImGui::CreateContext();
+        //ImGui_ImplGlfw_InitForOpenGL(window, true);
+
 
         while (!glfwWindowShouldClose(window)) {
             double currentTime = glfwGetTime();
