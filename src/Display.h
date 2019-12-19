@@ -36,6 +36,11 @@ private:
     PhysicsSimulation& simulation;
     std::vector<ModelData *> modelDatas;
 
+    ModelData* teapotModel;
+    ModelData* squareModel;
+    ModelData* cubeModel;
+    ModelData* arrowModel;
+
 public:
     SimulationDisplay(PhysicsSimulation& simulation):camera(glm::vec3(0.0, 0.0, 15.0), glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, 1.0, 0.0)), simulation(simulation){
 
@@ -44,11 +49,14 @@ public:
         renderer = new Renderer(true, false);
         basicShader = new Shader("resources/shaders/basic.shader");
 
-        initModels();
-
         for (RigidModel rm: simulation.models()) {
             modelDatas.push_back(new ModelData(rm));
         }
+
+        teapotModel = new ModelData("resources/models/teapot.obj");
+        squareModel = new ModelData("resources/models/square.obj");
+        cubeModel = new ModelData("resources/models/cube.obj");
+        arrowModel = new ModelData("resources/models/arrow.obj");
     }
 
     void startSimulationDisplay() {
@@ -66,7 +74,6 @@ public:
 
             windowEvents();
         }
-        destroyModels();
 
 
         glfwTerminate();
@@ -102,14 +109,14 @@ private:
         for (int i = 0; i < modelDatas.size(); i++) {
             const RigidModel& model = simulation.models()[i];
             modelDatas[i]->drawModel(simulation.models()[i], *cubeModel, *basicShader);
-            for(PointMass pm: model.pointMasses()){
-                Point r = model.pose().transformation() * glm::vec4(pm.pose().r(),1.0);
+            for(PointMass pm: model.pointMasses()) {
+                Point r = model.pose().transformation() * glm::vec4(pm.pose().r(), 1.0);
                 renderer->renderForce(simulation.forceAt(r), r, *basicShader);
             }
         }
 
-        //Force force(10.0,0.0,0.0);
-        //renderer.renderForce(force,glm::vec3(0),basicShader);
+//        Force force(10.0,0.0,0.0);
+//        renderer->renderForce(force,glm::vec3(0),*basicShader);
     }
     void processInputs() {
         if (window->isKeyPressed(GLFW_KEY_ESCAPE)) {

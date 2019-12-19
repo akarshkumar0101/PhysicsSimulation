@@ -8,35 +8,14 @@
 #include "Shader.h"
 
 
-float axisVertices[]={
-        -100.0,0.0,0.0,
-        +100.0,0.0,0.0,
-        0.0,-100.0,0.0,
-        0.0,+100.0,0.0,
-        0.0,0.0,-100.0,
-        0.0,0.0,+100.0,
-};
-unsigned int axisIndices[3][2]={
-        {0,1},
-        {2,3},
-        {4,5},
-};
+extern float axisVertices[18];
 
-unsigned int axisBuffer;
-unsigned int* axisIndicesBuffers = new unsigned int[3];
+extern unsigned int axisIndices[3][2];
 
-void initAxis(){
-    glGenBuffers(1, &axisBuffer);
-    glGenBuffers(3, axisIndicesBuffers);
+extern unsigned int axisBuffer;
+extern unsigned int axisIndicesBuffers[3];
 
-    glBindBuffer(GL_ARRAY_BUFFER, axisBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(axisVertices), axisVertices,GL_STATIC_DRAW);
-
-    for(int i=0;i<3;i++){
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, axisIndicesBuffers[i]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(axisIndices[i]), (void*) axisIndices[i],GL_STATIC_DRAW);
-    }
-}
+void initAxis();
 
 class Renderer{
 private:
@@ -124,15 +103,20 @@ public:
 
         //model = rotate*model;
 
-
-
-
-
-
         shader.setUniform("model", model);
 
-        arrowModel->draw(shader);
+//        ModelData::arrowModel.draw(shader);
     }
+};
+
+
+class Rendererf{
+private:
+
+
+public:
+    void setViewPort(int width, int height);
+    void clear();
 
 };
 

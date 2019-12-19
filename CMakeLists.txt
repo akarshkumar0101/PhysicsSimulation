@@ -21,7 +21,7 @@ add_executable(${PROJECT_NAME} Libraries/GL/glad.c
         ${IMGUI_SRC}
         #Libraries/ImGUI/examples/example_glfw_opengl2/main.cpp
         src/main.cpp
-        src/math/Vector.h src/math/VectorOps.h src/math/Matrix.h src/math/MatrixOps.h src/RigidModel.h src/Simulation.h src/math/Quaternion.h src/Physics.h src/math/QuaternionOps.h src/Display.h src/Shader.h src/ModelData.h src/Camera.h src/Renderer.h src/GraphicsBuffer.h src/Shader.cpp src/GraphicsBuffer.cpp src/Window.cpp src/Window.h)
+        src/math/Vector.h src/math/VectorOps.h src/math/Matrix.h src/math/MatrixOps.h src/RigidModel.h src/Simulation.h src/math/Quaternion.h src/Physics.h src/math/QuaternionOps.h src/Display.h src/Shader.h src/ModelData.h src/Camera.h src/Renderer.h src/GraphicsBuffer.h src/Shader.cpp src/GraphicsBuffer.cpp src/Window.cpp src/Window.h src/Camera.cpp src/Renderer.cpp src/ModelData.cpp)
 
 
 target_link_libraries(PhysicsSimulation glfw)
