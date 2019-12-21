@@ -34,6 +34,10 @@ public:
     ~IndexBuffer();
     void bind();
     void unbind();
+
+    unsigned int count(){
+        return mCount;
+    }
 };
 
 struct VertexBufferElement {

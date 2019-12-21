@@ -20,10 +20,10 @@
 #include <imgui_impl_glfw.h>
 
 #include "Shader.h"
-#include "ModelData.h"
+#include "ModelGraphicsData.h"
 #include "Camera.h"
 #include "Renderer.h"
-#include "Simulation.h"
+#include "PhysicsSimulation.h"
 #include "Window.h"
 
 
@@ -34,40 +34,31 @@ private:
     Renderer *renderer;
     Window* window;
     PhysicsSimulation& simulation;
-    std::vector<ModelData *> modelDatas;
-
-    ModelData* teapotModel;
-    ModelData* squareModel;
-    ModelData* cubeModel;
-    ModelData* arrowModel;
+    std::vector<ModelGraphicsData *> modelDatas;
 
 public:
     SimulationDisplay(PhysicsSimulation& simulation):camera(glm::vec3(0.0, 0.0, 15.0), glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, 1.0, 0.0)), simulation(simulation){
-
         window = new Window(500,500,"new window dog");
 
         renderer = new Renderer(true, false);
         basicShader = new Shader("resources/shaders/basic.shader");
 
+        CommonModels::initCommonModels();
+
         for (RigidModel rm: simulation.models()) {
-            modelDatas.push_back(new ModelData(rm));
+            modelDatas.push_back(new ModelGraphicsData(rm));
         }
 
-        teapotModel = new ModelData("resources/models/teapot.obj");
-        squareModel = new ModelData("resources/models/square.obj");
-        cubeModel = new ModelData("resources/models/cube.obj");
-        arrowModel = new ModelData("resources/models/arrow.obj");
+
     }
 
     void startSimulationDisplay() {
         double lastTime = glfwGetTime();
 
-
         while (!window->shouldClose()) {
             double currentTime = glfwGetTime();
             double dt = currentTime - lastTime;
             lastTime = currentTime;
-
 
             render();
             simulation.step(dt);
@@ -104,19 +95,28 @@ private:
         basicShader->setUniform("model", model);
         basicShader->setUniform("solidColor", glm::vec4(1.0, 0.0, 0.0, 1.0));
 
-        //teapotModel->draw(*basicShader);
+//        renderer->renderTriangleWise(*CommonModels::teapotModel,*basicShader);
 
         for (int i = 0; i < modelDatas.size(); i++) {
             const RigidModel& model = simulation.models()[i];
-            modelDatas[i]->drawModel(simulation.models()[i], *cubeModel, *basicShader);
+
+            renderer->renderLegitModel(*modelDatas[i], model, *CommonModels::cubeModel,*basicShader);
             for(PointMass pm: model.pointMasses()) {
                 Point r = model.pose().transformation() * glm::vec4(pm.pose().r(), 1.0);
-                renderer->renderForce(simulation.forceAt(r), r, *basicShader);
+//                renderer->renderForce(simulation.forceAt(r), r, *basicShader);
             }
         }
 
-//        Force force(10.0,0.0,0.0);
-//        renderer->renderForce(force,glm::vec3(0),*basicShader);
+        for(float x=-10;x<=10;x++){
+            for(float y=-10;y<=10;y++){
+                Point point(x,y,0);
+                Force force = 0.1f*simulation.forceAt(point);
+//                renderer->renderForce(force,point,*basicShader);
+            }
+        }
+
+        //Force force(10.0,0.0,0.0);
+        //renderer->renderForce(force,glm::vec3(0),*basicShader);
     }
     void processInputs() {
         if (window->isKeyPressed(GLFW_KEY_ESCAPE)) {

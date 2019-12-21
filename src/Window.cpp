@@ -24,17 +24,18 @@ Window::Window(const int width, const int height, const std::string& title): Win
 Window::Window(const int width, const int height, const std::string& title, GLFWmonitor* monitor, GLFWwindow* share){
     init();
 
-    mWindow = glfwCreateWindow(500,500,"window title",nullptr,nullptr);
+    mWindow = glfwCreateWindow(width,height,"window title",nullptr,nullptr);
     if(mWindow==nullptr){
         std::cout<<"failed to create window"<<std::endl;
         glfwTerminate();
         throw "Window not created";
     }
+
     glfwMakeContextCurrent(mWindow);
 
-    int gladLoadSucess = gladLoadGL();
+    int gladLoadSuccess = gladLoadGL();
 
-    if(gladLoadSucess==0){
+    if(gladLoadSuccess==0){
         std::cout<<"failed to load with glad"<<std::endl;
         glfwTerminate();
         throw "Could not initialize glad";

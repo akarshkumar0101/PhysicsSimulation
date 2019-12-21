@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "Display.h"
+#include "SimulationDisplay.h"
 #include "RigidModel.h"
-#include "Simulation.h"
+#include "PhysicsSimulation.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,10 +11,12 @@
 int main() {
 //    Pose pose(Point(1.0,2.0,3.0), Orientation(glm::vec3(8.0,2.0,3.0)));
 
-
     RigidModel model;
+    model.pointMasses().push_back(PointMass(1.0,Point(1.0,0.0,0.0)));
+    model.pointMasses().push_back(PointMass(1.0,Point(-1.0,0.0,0.0)));
     model.pointMasses().push_back(PointMass(1.0,Point(0.0,1.0,0.0)));
     model.pointMasses().push_back(PointMass(1.0,Point(0.0,-1.0,0.0)));
+    model.pointMasses().push_back(PointMass(1.0,Point(0.0,3.0,1.0)));
     model.establishModel();
 
     PhysicsSimulation simulation;

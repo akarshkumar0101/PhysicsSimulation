@@ -19,7 +19,6 @@ private:
     std::mutex mut;
 
 
-
 public:
     PhysicsSimulation(){}
 
@@ -28,7 +27,7 @@ public:
     }
     Force forceAt(const Point& point){
         //return 0.1f*glm::cross(point, glm::vec3(0,0,1));
-        return Force(point.y,0,0);
+        return Force(point.y, -point.x,0);
     }
 
     void step(const double dt){
@@ -56,7 +55,7 @@ public:
             totalTorque = totalTorque + relTorque;
         }
         //totalTorque = glm::rotate(model.pose().orientation(),totalTorque);
-        model.pose().r() += (float)dt *(totalForce/model.mass());
+//        model.pose().r() += (float)dt *(totalForce/model.mass());
         //std::cout<<model.pose().r().x<<std::endl;
     }
 
