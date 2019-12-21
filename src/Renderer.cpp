@@ -137,7 +137,7 @@ void Renderer::renderLineWise(const ModelGraphicsData &modelData, const Shader &
     glDrawElements(GL_LINES, modelData.indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::renderLegitModel(const ModelGraphicsData& modelData, const RigidModel &rigidModel, const ModelGraphicsData &jointModel, const Shader &shader) {
+void Renderer::renderRigidModel(const ModelGraphicsData& modelData, const RigidModel &rigidModel, const ModelGraphicsData &jointModel, const Shader &shader) {
     shader.setUniform("solidColor", glm::vec4(0.0, 0.0, 0.0, 1.0));
     glm::mat4 modelMatrix = rigidModel.pose().transformation();
 
