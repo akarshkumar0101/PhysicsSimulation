@@ -17,7 +17,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "GraphicsBuffer.h"
-#include "RigidModel.h"
+#include "RigidBody.h"
 
 class ModelGraphicsData {
 
@@ -42,7 +42,7 @@ public:
 
     ModelGraphicsData(const std::vector<float> &vertices, const std::vector<unsigned int> &indices);
 
-    ModelGraphicsData(const RigidModel &model);
+    ModelGraphicsData(const RigidBody &model);
 
     ~ModelGraphicsData();
 

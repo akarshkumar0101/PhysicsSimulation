@@ -24,7 +24,7 @@ Window::Window(const int width, const int height, const std::string& title): Win
 Window::Window(const int width, const int height, const std::string& title, GLFWmonitor* monitor, GLFWwindow* share){
     init();
 
-    mWindow = glfwCreateWindow(width,height,"window title",nullptr,nullptr);
+    mWindow = glfwCreateWindow(width,height,title.c_str(),nullptr,nullptr);
     if(mWindow==nullptr){
         std::cout<<"failed to create window"<<std::endl;
         glfwTerminate();

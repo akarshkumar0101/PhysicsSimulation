@@ -29,10 +29,10 @@
 
 class SimulationDisplay {
 private:
+    Window* window;
     Shader *basicShader;
     Camera camera;
     Renderer *renderer;
-    Window* window;
     PhysicsSimulation& simulation;
     std::vector<ModelGraphicsData *> modelDatas;
 
@@ -45,11 +45,9 @@ public:
 
         CommonModels::initCommonModels();
 
-        for (RigidModel rm: simulation.models()) {
+        for (RigidBody rm: simulation.models()) {
             modelDatas.push_back(new ModelGraphicsData(rm));
         }
-
-
     }
 
     void startSimulationDisplay() {
@@ -66,14 +64,12 @@ public:
             windowEvents();
         }
 
-
         glfwTerminate();
     }
 private:
     void windowEvents(){
         window->swapBuffers();
         glfwPollEvents();
-        window->makeContextCurrent();
         processInputs();
     }
 
@@ -81,28 +77,25 @@ private:
         //SET VIEW PORT
         int width, height;
         window->getFramebufferSize(width, height);
+        renderer->clear(width, height, *basicShader);
 
         basicShader->setUniform("projectionView", camera.computePerspectiveProjectionMatrix((float) width / height) *
                                                  camera.computeViewMatrix());
 
-        renderer->clear(width, height, *basicShader);
-
         glm::mat4 model(1.0f);
-        basicShader->setUniform("model", model);
 
         basicShader->bind();
-
         basicShader->setUniform("model", model);
         basicShader->setUniform("solidColor", glm::vec4(1.0, 0.0, 0.0, 1.0));
 
 //        renderer->renderTriangleWise(*CommonModels::teapotModel,*basicShader);
 
         for (int i = 0; i < modelDatas.size(); i++) {
-            const RigidModel& model = simulation.models()[i];
+            const RigidBody& model = simulation.models()[i];
 
-            renderer->renderRigidModel(*modelDatas[i], model, *CommonModels::cubeModel, *basicShader);
+            renderer->renderRigidBody(*modelDatas[i], model, *CommonModels::cubeModel, *basicShader);
             for(PointMass pm: model.pointMasses()) {
-                Point r = model.pose().transformation() * glm::vec4(pm.pose().r(), 1.0);
+                Point r = model.transformation() * glm::vec4(pm.pose().r(), 1.0);
 //                renderer->renderForce(simulation.forceAt(r), r, *basicShader);
             }
         }
@@ -111,12 +104,9 @@ private:
             for(float y=-10;y<=10;y++){
                 Point point(x,y,0);
                 Force force = 0.1f*simulation.forceAt(point);
-//                renderer->renderForce(force,point,*basicShader);
+                renderer->renderForce(force,point,*basicShader);
             }
         }
-
-        //Force force(10.0,0.0,0.0);
-        //renderer->renderForce(force,glm::vec3(0),*basicShader);
     }
     void processInputs() {
         if (window->isKeyPressed(GLFW_KEY_ESCAPE)) {
@@ -151,7 +141,7 @@ private:
         double xOffset = xPos - lastXPos;
         double yOffset = yPos - lastYPos;
 
-        camera.look(xOffset, yOffset);
+//        camera.look(xOffset, yOffset);
 
         lastXPos = xPos;
         lastYPos = yPos;

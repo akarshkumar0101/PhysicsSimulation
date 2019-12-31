@@ -31,7 +31,7 @@ public:
     void renderTriangleWise(const ModelGraphicsData& modelData, const Shader& shader);
     void renderLineWise(const ModelGraphicsData& modelData, const Shader& shader);
 
-    void renderRigidModel(const ModelGraphicsData& modelData, const RigidModel &rigidModel, const ModelGraphicsData &jointModel, const Shader &shader);
+    void renderRigidBody(const ModelGraphicsData& modelData, const RigidBody &rigidBody, const ModelGraphicsData &jointModel, const Shader &shader);
 
     void renderForce(const Force& force, const Point& position, const Shader& shader);
 };

@@ -8,52 +8,59 @@
 #include <thread>
 #include <mutex>
 
-#include "RigidModel.h"
+#include "RigidBody.h"
 #include "Physics.h"
+
+#include <glfw/glfw3.h>
 
 
 class PhysicsSimulation {
 
 private:
-    std::vector<RigidModel> mModels;
+    std::vector<RigidBody> mModels;
     std::mutex mut;
 
 
 public:
     PhysicsSimulation(){}
 
-    std::vector<RigidModel>& models() const{
-        return (std::vector<RigidModel>&) mModels;
+    std::vector<RigidBody>& models() const{
+        return (std::vector<RigidBody>&) mModels;
     }
-    Force forceAt(const Point& point){
+    Force forceAt(const Point& point) const {
         //return 0.1f*glm::cross(point, glm::vec3(0,0,1));
-        return Force(point.y, -point.x,0);
+//        return Force(point.y, -point.x, 10*sin(glfwGetTime()));
+        //return 0.1f*Force(point.y, -point.x, 0);
+//        return Force(sin(glfwGetTime()), 0, 0);
+        return Force(-point.x,0,0);
+//        return -glm::normalize(point)*glm::dot(point,point);
     }
 
     void step(const double dt){
         mut.lock();
-        for(RigidModel& model: mModels){
+        for(RigidBody& model: mModels){
             updateModel(model,dt);
         }
         mut.unlock();
     }
 
-    void updateModel(RigidModel& model, const double dt){
+    void updateModel(RigidBody& model, const double dt){
         Force totalForce(0.0);
         Torque totalTorque(0.0);
 
-        for(PointMass& pm: model.pointMasses()){
-            Point relR = pm.pose().r();
-            Point absR = model.pose().transformation() * glm::vec4(pm.pose().r(),1.0);
-
-            Force absForceAtPM = forceAt(absR);
-
-            totalForce = totalForce + absForceAtPM;
-
-            Torque relTorque = glm::cross(relR, absForceAtPM);
-
-            totalTorque = totalTorque + relTorque;
-        }
+//        for(PointMass& pm: model.pointMasses()){
+//            Point relR = pm.pose().r();
+//            Point absR = model.pose().transformation() * glm::vec4(pm.pose().r(),1.0);
+//
+//            Force absForceAtPM = forceAt(absR);
+//
+//            totalForce = totalForce + absForceAtPM;
+//
+//            Torque relTorque = glm::cross(relR, absForceAtPM);
+//
+//            totalTorque = totalTorque + relTorque;
+//        }
+        model.update(dt, *this);
         //totalTorque = glm::rotate(model.pose().orientation(),totalTorque);
 //        model.pose().r() += (float)dt *(totalForce/model.mass());
         //std::cout<<model.pose().r().x<<std::endl;

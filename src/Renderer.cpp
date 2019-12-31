@@ -137,14 +137,17 @@ void Renderer::renderLineWise(const ModelGraphicsData &modelData, const Shader &
     glDrawElements(GL_LINES, modelData.indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::renderRigidModel(const ModelGraphicsData& modelData, const RigidModel &rigidModel, const ModelGraphicsData &jointModel, const Shader &shader) {
+void Renderer::renderRigidBody(const ModelGraphicsData& modelData, const RigidBody &rigidBody, const ModelGraphicsData &jointModel, const Shader &shader) {
     shader.setUniform("solidColor", glm::vec4(0.0, 0.0, 0.0, 1.0));
-    glm::mat4 modelMatrix = rigidModel.pose().transformation();
+
+//    glm::mat4 modelMatrix = rigidBody.pose().transformation();
+    glm::mat4 modelMatrix = rigidBody.transformation();
 
     shader.setUniform("model", modelMatrix);
+
     renderLineWise(modelData, shader);
 
-    for (PointMass pm: rigidModel.pointMasses()) {
+    for (PointMass pm: rigidBody.pointMasses()) {
         glm::mat4 pointTransform = pm.pose().transformation();
         pointTransform = glm::scale(pointTransform, glm::vec3(0.1));
         shader.setUniform("model", modelMatrix * pointTransform);
