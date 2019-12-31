@@ -95,7 +95,7 @@ private:
 
             renderer->renderRigidBody(*modelDatas[i], model, *CommonModels::cubeModel, *basicShader);
             for(PointMass pm: model.pointMasses()) {
-                Point r = model.transformation() * glm::vec4(pm.pose().r(), 1.0);
+                //Point r = model.transformation() * glm::vec4(pm.r(), 1.0);
 //                renderer->renderForce(simulation.forceAt(r), r, *basicShader);
             }
         }

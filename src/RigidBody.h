@@ -18,18 +18,25 @@ class PhysicsSimulation;
 class PointMass {
 private:
     float mMass;
-    //pose relative to rigid body
-    Pose mPose;
+    // mR relative to rigid body
+    Point mR;
 public:
     PointMass(const float mass):mMass(mass){
     }
-    PointMass(const float mass, const Point& r) :mMass(mass), mPose(r){
+    PointMass(const float mass, const Point& r) :mMass(mass), mR(r){
     }
     float& mass() const {
         return (float&) mMass;
     }
-    Pose& pose() const {
-        return (Pose&) mPose;
+    Point& r() const{
+        return (Point&) mR;
+    }
+    //returns a transformation to take you from this object's coordinate system to the parent's
+    glm::mat4 transformation(){
+        glm::mat4 trans(1.0);
+        trans = glm::translate(trans, mR);
+        //trans = trans * glm::toMat4(mPose.orientation());
+        return trans;
     }
 };
 
@@ -84,8 +91,8 @@ public:
 
     glm::mat4 transformation() const {
         glm::mat4 trans(1.0);
-        trans = glm::translate(trans, mX);
-        trans = trans * glm::mat4(mR);
+        //first rotate then translate
+        trans = glm::translate(trans, mX) * glm::mat4(mR);
         return trans;
     }
 

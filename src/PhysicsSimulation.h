@@ -48,22 +48,7 @@ public:
         Force totalForce(0.0);
         Torque totalTorque(0.0);
 
-//        for(PointMass& pm: model.pointMasses()){
-//            Point relR = pm.pose().r();
-//            Point absR = model.pose().transformation() * glm::vec4(pm.pose().r(),1.0);
-//
-//            Force absForceAtPM = forceAt(absR);
-//
-//            totalForce = totalForce + absForceAtPM;
-//
-//            Torque relTorque = glm::cross(relR, absForceAtPM);
-//
-//            totalTorque = totalTorque + relTorque;
-//        }
         model.update(dt, *this);
-        //totalTorque = glm::rotate(model.pose().orientation(),totalTorque);
-//        model.pose().r() += (float)dt *(totalForce/model.mass());
-        //std::cout<<model.pose().r().x<<std::endl;
     }
 
     void simulate(){

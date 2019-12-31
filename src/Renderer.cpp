@@ -148,7 +148,7 @@ void Renderer::renderRigidBody(const ModelGraphicsData& modelData, const RigidBo
     renderLineWise(modelData, shader);
 
     for (PointMass pm: rigidBody.pointMasses()) {
-        glm::mat4 pointTransform = pm.pose().transformation();
+        glm::mat4 pointTransform = pm.transformation();
         pointTransform = glm::scale(pointTransform, glm::vec3(0.1));
         shader.setUniform("model", modelMatrix * pointTransform);
         renderTriangleWise(jointModel, shader);

@@ -26,14 +26,14 @@ void RigidBody::establishModel(){
     mMass = 0.0f;
     for(const PointMass& pm: mPointMasses){
         mMass += pm.mass();
-        cm += (pm.mass()*pm.pose().r());
+        cm += (pm.mass()*pm.r());
     }
     cm/=mMass;
     //found center of mass now
 
     // realign everything to center of mass
     for(PointMass& pm: mPointMasses){
-        pm.pose().r() -= cm;
+        pm.r() -= cm;
     }
     cm -= cm;
 
@@ -45,7 +45,7 @@ void RigidBody::establishModel(){
 
     mIBody = glm::mat4(0.0);
     for(PointMass& pm: mPointMasses){
-        glm::vec3 rp = pm.pose().r();
+        glm::vec3 rp = pm.r();
 
         glm::vec3 r0i = glm::transpose(mR) * rp;
         r0i = rp;
@@ -55,6 +55,10 @@ void RigidBody::establishModel(){
 
         glm::mat3 lol = in * glm::mat3(1.0) - out;
         mIBody += pm.mass()* (lol);
+    }
+
+    if(glm::determinant(mIBody) == 0) {
+        throw "Cannot create inverse body matrix";
     }
 
     mIBodyInv = glm::inverse(mIBody);
@@ -134,7 +138,7 @@ void RigidBody::update(float dt, const PhysicsSimulation& simulation) {
     Torque torque(0.0);
 
     for(PointMass& pm: mPointMasses){
-        glm::vec3 r = mR * pm.pose().r() + mX;
+        glm::vec3 r = mR * pm.r() + mX;
         glm::vec3 rp = r-mX;
 
         Force forceI = simulation.forceAt(r);

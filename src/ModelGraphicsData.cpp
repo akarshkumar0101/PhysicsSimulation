@@ -55,12 +55,12 @@ ModelGraphicsData::ModelGraphicsData(const std::vector<float> &vertices, const s
 
 ModelGraphicsData::ModelGraphicsData(const RigidBody &model) {
     for (int i = 0; i < model.pointMasses().size(); i++) {
-        Point r = model.pointMasses()[i].pose().r();
+        Point r = model.pointMasses()[i].r();
         mVertices.push_back(r.x);
         mVertices.push_back(r.y);
         mVertices.push_back(r.z);
         for (int j = i + 1; j < model.pointMasses().size(); j++) {
-            Point r2 = model.pointMasses()[j].pose().r();
+            Point r2 = model.pointMasses()[j].r();
             mIndices.push_back(i);
             mIndices.push_back(j);
         }

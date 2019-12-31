@@ -13,8 +13,8 @@ int main() {
     RigidBody model;
     model.pointMasses().emplace_back(1.0,Point(0.0,0.0,1.0));
     model.pointMasses().emplace_back(1.0,Point(0.0,0.0,-1.0));
-    model.pointMasses().emplace_back(1.0,Point(0.0,1.0,0.0));
-    model.pointMasses().emplace_back(1.0,Point(0.0,-1.0,0.0));
+//    model.pointMasses().emplace_back(1.0,Point(0.0,1.0,0.0));
+//    model.pointMasses().emplace_back(1.0,Point(0.0,-1.0,0.0));
 //    model.pointMasses().emplace_back(1.0,Point(1.0,0.0,0.0));
     model.establishModel();
 
