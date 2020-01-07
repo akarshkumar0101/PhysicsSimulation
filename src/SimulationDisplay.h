@@ -44,6 +44,7 @@ public:
         basicShader = new Shader("resources/shaders/basic.shader");
 
         CommonModels::initCommonModels();
+        VertexBufferLayout::initCommonLayouts();
 
         for (RigidBody rm: simulation.models()) {
             modelDatas.push_back(new ModelGraphicsData(rm));
@@ -134,14 +135,16 @@ private:
         }
 
         double xPos, yPos;
-        window->getCursorPosition(xPos,yPos);
+        window->getCursorPosition(xPos, yPos);
 
         static double lastXPos = xPos, lastYPos = yPos;
 
         double xOffset = xPos - lastXPos;
         double yOffset = yPos - lastYPos;
 
-//        camera.look(xOffset, yOffset);
+        if (window->cursorIsInWindow()) {
+            camera.look(xOffset, yOffset);
+        }
 
         lastXPos = xPos;
         lastYPos = yPos;

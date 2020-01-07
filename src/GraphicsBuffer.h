@@ -52,9 +52,15 @@ struct VertexBufferElement {
 
 class VertexBufferLayout{
 private:
+    //vertex array object
+    unsigned int mBufferID;
     std::vector<VertexBufferElement> mElements;
     size_t mStride;
 public:
+    static VertexBufferLayout* vertexOnlyLayout;
+    static void initCommonLayouts();
+    static void destroyCommonLayouts();
+
     VertexBufferLayout();
     VertexBufferLayout(const std::vector<VertexBufferElement>& elements );
     template<int N>

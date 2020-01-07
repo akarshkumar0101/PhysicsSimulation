@@ -1,11 +1,11 @@
 #shader vertex
 //vec3->vec4
-#version 410
+#version 120
 
 uniform mat4 model;
 uniform mat4 projectionView;
 
-in vec3 vPos;
+attribute vec3 vPos;
 
 void main()
 {
@@ -14,14 +14,11 @@ void main()
 
 #shader fragment
 //?->vec4(color)
-#version 410
+#version 120
 
 uniform vec4 solidColor;
 
-out vec4 FragColor;
-
 void main()
 {
-    //gl_FragColor = solidColor;
-    FragColor = solidColor;
+    gl_FragColor = solidColor;
 }

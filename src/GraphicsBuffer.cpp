@@ -56,7 +56,9 @@ size_t VertexBufferElement::sizeofType(int type){
 }
 
 
-VertexBufferLayout::VertexBufferLayout():mStride(0){}
+VertexBufferLayout::VertexBufferLayout():mStride(0){
+    glGenVertexArrays(1, &mBufferID);
+}
 VertexBufferLayout::VertexBufferLayout(const std::vector<VertexBufferElement>& elements ):VertexBufferLayout(){
     for(auto e:elements){
         addElement(e);
@@ -77,6 +79,8 @@ void VertexBufferLayout::addElement(const unsigned int type,const unsigned int c
 }
 
 void VertexBufferLayout::bindVertexAttributesToShader(const Shader& shader) const{
+    glBindVertexArray(mBufferID);
+
     size_t offset = 0;
     for (VertexBufferElement e: mElements) {
         int attribLocation = shader.getAttribLocation(e.shaderAttributeName);
@@ -86,7 +90,6 @@ void VertexBufferLayout::bindVertexAttributesToShader(const Shader& shader) cons
         offset += e.count * VertexBufferElement::sizeofType(e.type);
     }
 }
-
 
 template<>
 void VertexBufferLayout::addElement<float>(unsigned int count, const std::string shaderAttributeName){
@@ -99,4 +102,14 @@ void VertexBufferLayout::addElement<unsigned int>(unsigned int count, const std:
 template<>
 void VertexBufferLayout::addElement<unsigned char>(unsigned int count, const std::string shaderAttributeName){
     addElement(GL_UNSIGNED_BYTE, count, GL_FALSE, shaderAttributeName);
+}
+
+VertexBufferLayout* VertexBufferLayout::vertexOnlyLayout = nullptr;
+
+void VertexBufferLayout::initCommonLayouts() {
+    vertexOnlyLayout = new VertexBufferLayout({{GL_FLOAT, 3, false, "vPos"}});
+}
+
+void VertexBufferLayout::destroyCommonLayouts() {
+    delete vertexOnlyLayout;
 }

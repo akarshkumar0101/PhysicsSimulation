@@ -37,7 +37,7 @@ void RigidBody::establishModel(){
     }
     cm -= cm;
 
-    mX = glm::vec3(0.3,0.0,0.0);
+    mX = glm::vec3(0.0,0.0,0.0);
     //mR = glm::mat3(1.0);
     mQ = glm::quat(glm::vec3(0.0));
     mP = glm::vec3(0.0,0.0,0.0);

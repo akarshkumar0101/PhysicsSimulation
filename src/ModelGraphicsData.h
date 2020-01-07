@@ -65,6 +65,7 @@ namespace CommonModels{
     extern ModelGraphicsData* arrowModel;
 
     void initCommonModels();
+    void destroyCommonModels();
 }
 
 

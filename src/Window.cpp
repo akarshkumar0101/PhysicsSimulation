@@ -24,6 +24,14 @@ Window::Window(const int width, const int height, const std::string& title): Win
 Window::Window(const int width, const int height, const std::string& title, GLFWmonitor* monitor, GLFWwindow* share){
     init();
 
+    //const char* glsl_version = "#version 150";
+
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
+
     mWindow = glfwCreateWindow(width,height,title.c_str(),nullptr,nullptr);
     if(mWindow==nullptr){
         std::cout<<"failed to create window"<<std::endl;
@@ -32,6 +40,7 @@ Window::Window(const int width, const int height, const std::string& title, GLFW
     }
 
     glfwMakeContextCurrent(mWindow);
+    glfwSwapInterval(1); // Enable vsync
 
     int gladLoadSuccess = gladLoadGL();
 
@@ -89,6 +98,27 @@ void Window::getCursorPosition(double &xPos, double& yPos) {
     glfwGetCursorPos(mWindow, &xPos, &yPos);
 }
 
+
+void Window::setRoot(Node& root){
+    mRoot = &root;
+    mRoot->setViewport(Viewport());
+}
+void Window::render(){
+
+}
+
+void Window::pollEvents() {
+    glfwPollEvents();
+}
+
+bool Window::cursorIsInWindow() {
+    //temporary solution:
+    double x, y;
+    getCursorPosition(x, y);
+    int width, height;
+    getFramebufferSize(width, height);
+    return x>=0 && y>=0 && x<=width && y <=height;
+}
 
 
 

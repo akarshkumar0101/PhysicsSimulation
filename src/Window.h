@@ -8,11 +8,15 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "Node.h"
 
+
+class Node;
 
 class Window {
 private:
     GLFWwindow* mWindow;
+    Node* mRoot = nullptr;
 
     void init();
 
@@ -26,7 +30,11 @@ public:
     void setShouldClose(bool shouldClose);
     bool shouldClose();
 
+    void setRoot(Node& root);
+    void render();
+
     void makeContextCurrent();
+    void pollEvents();
     void swapBuffers();
 
     bool isKeyReleased(int key);
@@ -34,6 +42,7 @@ public:
     bool isKeyRepeated(int key);
 
     void getCursorPosition(double& xPos, double& yPos);
+    bool cursorIsInWindow();
 
     GLFWwindow* getRawWindowPointer();
 };

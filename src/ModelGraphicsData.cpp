@@ -90,6 +90,12 @@ namespace CommonModels{
         cubeModel = new ModelGraphicsData("resources/models/cube.obj");
         arrowModel = new ModelGraphicsData("resources/models/arrow.obj");
     }
+    void destroyCommonModels(){
+        delete teapotModel;
+        delete squareModel;
+        delete cubeModel;
+        delete arrowModel;
+    }
 }
 
 
