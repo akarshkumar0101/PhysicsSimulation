@@ -5,47 +5,119 @@
 #include "GridNode.h"
 
 
-GridNode::GridNode(Window& window, std::pair<unsigned int, unsigned int> gridDimensions): Node(window), mGridDimensions(std::move(gridDimensions)) {
+GridNode::GridNode(std::shared_ptr<Window> window, std::pair<unsigned int, unsigned int> gridDimensions): Node(window), mGridDimensions(std::move(gridDimensions)) {
 }
 
 
-void GridNode::setViewportForChild(std::pair<unsigned int, unsigned int> gridLocation) {
-    int width = mViewport.width() / mGridDimensions.first;
-    int height = mViewport.height() / mGridDimensions.second;
-    int x = mViewport.x()+ (((float) gridLocation.first/mGridDimensions.first) * mViewport.width());
-    int y = mViewport.y()+ (((float) gridLocation.second/mGridDimensions.second) * mViewport.height());
-    Viewport viewport(x, y, width, height);
-    mGridChildren[gridLocation]->setViewport(viewport);
+Viewport GridNode::viewportForChild(std::pair<unsigned int, unsigned int> gridLocation, const Viewport& viewport) {
+    int width = viewport.width() / mGridDimensions.first;
+    int height = viewport.height() / mGridDimensions.second;
+    int x = viewport.x() + (((float) gridLocation.first / mGridDimensions.first) * viewport.width());
+    int y = viewport.y() + (((float) gridLocation.second / mGridDimensions.second) * viewport.height());
+
+    return Viewport(x, y, width, height);
 }
 
-void GridNode::setViewport(const Viewport &viewport) {
-    Node::setViewport(viewport);
-    for(auto it: mGridChildren){
-        setViewportForChild(it.first);
-    }
-}
-
-void GridNode::setChild(Node& node, std::pair<unsigned int, unsigned int> gridLocation){
+void GridNode::setChild(std::shared_ptr<Node> node, std::pair<unsigned int, unsigned int> gridLocation){
     Node::addChild(node);
 
     auto it = mGridChildren.find(gridLocation);
-    if(it != mGridChildren.end()){ // if child already exists
-        Node::removeChild(*(it->second));
-        it->second = std::shared_ptr<Node>(&node);
+    if(it != mGridChildren.end()) { // if child already exists
+        Node::removeChild(it->second);
     }
-    else{
-        mGridChildren.insert(std::pair(gridLocation, std::shared_ptr<Node>(&node)));
-    }
-    setViewportForChild(gridLocation);
+    mGridChildren[gridLocation] = node;
+    //viewportForChild(gridLocation);
 }
 void GridNode::removeChild(std::pair<unsigned int, unsigned int> gridLocation) {
-    Node::removeChild(*(mGridChildren[gridLocation]));
+    Node::removeChild(mGridChildren[gridLocation]);
     mGridChildren.erase(gridLocation);
 }
 
-void GridNode::render() {
+
+
+
+
+static GraphicsData& horizontalLine(){
+    static bool first = true;
+    static std::shared_ptr<VertexBuffer> vb = std::make_shared<VertexBuffer>();
+    static std::shared_ptr<VertexArray> va = std::make_shared<VertexArray>();
+    static VertexBufferLayout vbl;
+    static std::shared_ptr<IndexBuffer> ib = std::make_shared<IndexBuffer>();
+
+    if(first){
+        std::vector<float> verts({0,0,1,0});
+        std::vector<unsigned int> inds({0,1});
+        vb->createBuffer(verts.data(), verts.size() * sizeof(float));
+        ib->putData(inds.data(), inds.size());
+
+        vbl.addElement<float>(2);
+        va->addBuffer(vb, vbl);
+    }
+
+    static GraphicsData horizontalLine(va,ib);
+
+    first = false;
+    return horizontalLine;
+}
+static GraphicsData& verticalLine(){
+    static GraphicsData verticalLine({0,0,0,1},{0,1});
+    return verticalLine;
+}
+static Shader& gridShader(){
+    static Shader shader("resources/shaders/gridborders.shader");
+    return shader;
+}
+static GraphicsData& tempBuffer(){
+    static GraphicsData data({-1,-1,0, -1,1,0, 1,-1,0, 1,1,0},{0,1,0,2,1,3,2,3});
+    return data;
+}
+static GraphicsData& tempBufferX(){
+    static GraphicsData data({-1,0,0, 1,0,0},{0,1});
+    return data;
+}
+static GraphicsData& tempBufferY(){
+    static GraphicsData data({0,-1,0, 0,1,0},{0,1});
+    return data;
+}
+
+void GridNode::render(const Viewport& viewport) {
+    viewport.bind();
+    gridShader().bind();
+
+    glm::mat4 iden(1.0);
+    gridShader().setUniform("solidColor", glm::vec4(0.0,1.0,0.0,1.0));
+    for(int x=1;x<mGridDimensions.first;x++){
+        float xVal = ((float)x/mGridDimensions.first)*2.0f-1.0f;
+        glm::mat4 trans = glm::translate(iden,glm::vec3(xVal,0,0));
+        gridShader().bind();
+        gridShader().setUniform("transform", trans);
+        tempBufferY().bind();
+        glDrawElements(GL_LINES, tempBufferY().indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
+    }
+    for(int y=1;y<mGridDimensions.second;y++){
+        float yVal = ((float)y / mGridDimensions.second) * 2.0f - 1.0f;
+        glm::mat4 trans = glm::translate(iden,glm::vec3(0, yVal, 0));
+        gridShader().bind();
+        gridShader().setUniform("transform", trans);
+        tempBufferX().bind();
+        glDrawElements(GL_LINES, tempBufferX().indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
+    }
+
     for(auto it: mGridChildren){
-        it.second->renderNode();
+        Viewport childViewport = viewportForChild(it.first,viewport);
+
+        childViewport.bind();
+
+        gridShader().bind();
+        gridShader().setUniform("solidColor", glm::vec4(1.0,0.0,0.0,1.0));
+        glm::mat4 transformp = glm::scale(iden,glm::vec3(0.99f));
+        gridShader().setUniform("transform", transformp);
+
+        tempBuffer().bind();
+        glDrawElements(GL_LINES, tempBuffer().indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
+
+
+        it.second->render(childViewport);
     }
 }
 

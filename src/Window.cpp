@@ -99,12 +99,15 @@ void Window::getCursorPosition(double &xPos, double& yPos) {
 }
 
 
-void Window::setRoot(Node& root){
-    mRoot = &root;
-    mRoot->setViewport(Viewport());
+void Window::setRoot(std::shared_ptr<Node> root){
+    mRoot = root;
 }
 void Window::render(){
-
+    if(mRoot){
+        int width, height;
+        getFramebufferSize(width, height);
+        mRoot->render(Viewport(0,0,width, height));
+    }
 }
 
 void Window::pollEvents() {

@@ -18,12 +18,31 @@ void VertexBuffer::bind() const{
 void VertexBuffer::unbind() const{
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
-void VertexBuffer::putData(const void* data, const size_t size) {
+void VertexBuffer::createBuffer(const void* data, const size_t size) {
+    createBuffer(data, size, STATIC);
+}
+void VertexBuffer::createBuffer(const void* data, const size_t size, BufferUsage usage) {
     mSize = size;
     bind();
-    glBufferData(GL_ARRAY_BUFFER, mSize, data, GL_STATIC_DRAW);
+    GLenum glUsage;
+    switch(usage) {
+        case STATIC: {
+            glUsage = GL_STATIC_DRAW;
+            break;
+        }
+        case DYNAMIC:{
+            glUsage = GL_DYNAMIC_DRAW;
+            break;
+        }
+    }
+
+    glBufferData(GL_ARRAY_BUFFER, mSize, data, glUsage);
     unbind();
+
+    glBufferSubData(GL_ARRAY_BUFFER, 24, 89, nullptr);
 }
+
+
 size_t VertexBuffer::size() const{
     return mSize;
 }
@@ -116,8 +135,8 @@ VertexArray::~VertexArray(){
 }
 
 void VertexArray::addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout){
-//    referencedBuffers.insert(std::shared_ptr<VertexBuffer>(&vertexBuffer));
-    referencedBuffers.insert(vertexBuffer);
+//    mReferencedBuffers.insert(std::shared_ptr<VertexBuffer>(&vertexBuffer));
+    mReferencedBuffers.insert(vertexBuffer);
 
     bind();
     vertexBuffer->bind();
@@ -135,10 +154,10 @@ void VertexArray::addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, co
 }
 
 
-void VertexArray::addBuffer(const VertexBuffer &vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames){
-    referencedBuffers.emplace(&vertexBuffer);
+void VertexArray::addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames){
+    mReferencedBuffers.insert(vertexBuffer);
     bind();
-    vertexBuffer.bind();
+    vertexBuffer->bind();
 
     size_t offset = 0;
 
@@ -190,7 +209,7 @@ void GraphicsData::initBuffers(const std::vector<float>& vertices, const std::ve
     mIndexBuffer->putData(indices.data(), indices.size());
 
     std::shared_ptr<VertexBuffer> vertexBuffer = std::make_shared<VertexBuffer>();
-    vertexBuffer->putData(vertices.data(), vertices.size() * sizeof(float));
+    vertexBuffer->createBuffer(vertices.data(), vertices.size() * sizeof(float));
 
     mVertexArray = std::make_shared<VertexArray>();
     mVertexArray->addBuffer(vertexBuffer, *VertexBufferLayout::coordinateOnlyLayout);
@@ -206,6 +225,8 @@ std::vector<unsigned int> GraphicsData::defaultListOfIndices(const std::vector<f
 
 GraphicsData::GraphicsData(const std::string &fileName) {
     loadFromFile(fileName);
+}
+GraphicsData::GraphicsData(std::shared_ptr<VertexArray> vertexArray, std::shared_ptr<IndexBuffer> indexBuffer): mVertexArray(vertexArray), mIndexBuffer(indexBuffer){
 }
 
 GraphicsData::GraphicsData(const std::vector<float> &vertices) {

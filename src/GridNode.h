@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "Node.h"
+#include "GraphicsBuffer.h"
 
 
 struct pair_hash
@@ -26,17 +27,15 @@ private:
 
     std::unordered_map<std::pair<unsigned int, unsigned int>, std::shared_ptr<Node>, pair_hash> mGridChildren;
 
-    void setViewportForChild(std::pair<unsigned int, unsigned int> gridLocation);
+    Viewport viewportForChild(std::pair<unsigned int, unsigned int> gridLocation, const Viewport& viewport);
 
 public:
-    GridNode(Window& window, std::pair<unsigned int, unsigned int> gridDimensions);
+    GridNode(std::shared_ptr<Window> window, std::pair<unsigned int, unsigned int> gridDimensions);
 
-    void setViewport(const Viewport& viewport) override;
-
-    void setChild(Node& node, std::pair<unsigned int, unsigned int> gridLocation);
+    void setChild(std::shared_ptr<Node> node, std::pair<unsigned int, unsigned int> gridLocation);
     void removeChild(std::pair<unsigned int, unsigned int> gridLocation);
 
-    void render() override;
+    void render(const Viewport& viewport) override;
 
 };
 

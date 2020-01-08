@@ -10,24 +10,14 @@ Viewport::Viewport(const int x, const int y, const int width, const int height):
 }
 
 
-Node::Node(Window &window): mWindow(window){
+Node::Node(std::shared_ptr<Window>window): mWindow(window){
 }
 
-void Node::setViewport(const Viewport &viewport) {
-    mViewport = viewport;
+void Node::addChild(std::shared_ptr<Node> node) {
+    mChildren.insert(node);
 }
-
-void Node::addChild(Node& node) {
-    mChildren.emplace(&node);
-}
-void Node::removeChild(Node& node) {
-    mChildren.erase(std::shared_ptr<Node>(&node));
-}
-
-void Node::renderNode() {
-    //use window.setViewport
-    glViewport(mViewport.x(),mViewport.y(),mViewport.width(), mViewport.height());
-    render();
+void Node::removeChild(std::shared_ptr<Node> node) {
+    mChildren.erase(node);
 }
 
 Node::~Node() {

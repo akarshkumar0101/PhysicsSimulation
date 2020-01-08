@@ -16,7 +16,7 @@ class Node;
 class Window {
 private:
     GLFWwindow* mWindow;
-    Node* mRoot = nullptr;
+    std::shared_ptr<Node> mRoot = nullptr;
 
     void init();
 
@@ -30,7 +30,7 @@ public:
     void setShouldClose(bool shouldClose);
     bool shouldClose();
 
-    void setRoot(Node& root);
+    void setRoot(std::shared_ptr<Node> root);
     void render();
 
     void makeContextCurrent();

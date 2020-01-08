@@ -4,29 +4,36 @@
 
 #include "Renderer.h"
 
-float axisVertices[18]={
-        -100.0,0.0,0.0,
-        +100.0,0.0,0.0,
-        0.0,-100.0,0.0,
-        0.0,+100.0,0.0,
-        0.0,0.0,-100.0,
-        0.0,0.0,+100.0,
+static float axisVertices[]={
+        -100.0,0.0,0.0,  1.0,0.0,0.0,1.0,
+        +100.0,0.0,0.0,  1.0,0.0,0.0,1.0,
+        0.0,-100.0,0.0,  0.0,1.0,0.0,1.0,
+        0.0,+100.0,0.0,  0.0,1.0,0.0,1.0,
+        0.0,0.0,-100.0,  0.0,0.0,1.0,1.0,
+        0.0,0.0,+100.0,  0.0,0.0,1.0,1.0,
 };
 
-unsigned int axisIndices[3][2]={
+static unsigned int axisIndices[3][2]={
         {0,1},
         {2,3},
         {4,5},
 };
 
-IndexBuffer* ib[3];
-std::shared_ptr<VertexArray> va(nullptr);
+static IndexBuffer* ib[3];
+static std::shared_ptr<VertexArray> va(nullptr);
+
+static Shader* axisShader;
 
 void initAxis() {
+    axisShader = new Shader("resources/shaders/axis.shader");
+
     auto vb = std::make_shared<VertexBuffer>();
-    vb->putData(axisVertices, sizeof(axisVertices));
+    vb->createBuffer(axisVertices, sizeof(axisVertices));
     va = std::make_shared<VertexArray>();
-    va->addBuffer(vb, *VertexBufferLayout::coordinateOnlyLayout);
+    VertexBufferLayout vbl;
+    vbl.addElement<float>(3);
+    vbl.addElement<float>(4);
+    va->addBuffer(vb, vbl, *axisShader, {"vPos", "axisColor"});
 
     for (int i = 0; i < 3; i++) {
         ib[i] = new IndexBuffer();
@@ -34,16 +41,11 @@ void initAxis() {
     }
 }
 
-void Renderer::renderAxis(const Shader &shader) {
-    shader.bind();
+void Renderer::renderAxis(const glm::mat4& projectionView) {
+    axisShader->bind();
+    axisShader->setUniform("projectionView", projectionView);
 
     for(int i=0;i<3;i++){
-        glm::vec4 color(0.0);
-        color[i] = 1.0;
-        color[3] = 1.0;
-        shader.setUniform("solidColor", color);
-
-
         va->bind();
         ib[i]->bind();
 
@@ -52,14 +54,9 @@ void Renderer::renderAxis(const Shader &shader) {
 
 }
 
-void Renderer::clear(int width, int height, const Shader &shader){
-    glViewport(0, 0, width, height);
+void Renderer::clear(int width, int height){
+    glViewport(0,0,width,height);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    if (mAxis) {
-        glm::mat4 model(1.0f);
-        shader.setUniform("model", model);
-        renderAxis(shader);
-    }
 }
 
 Renderer::Renderer(bool axis, bool wireFrame): mAxis(axis), mWireFrame(wireFrame) {

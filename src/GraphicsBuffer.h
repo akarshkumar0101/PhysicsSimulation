@@ -14,6 +14,36 @@
 #include "Shader.h"
 #include "RigidBody.h"
 
+enum BufferUsage{
+    STATIC, DYNAMIC
+};
+
+class GraphicsBuffer {
+private:
+    const unsigned int mBufferID;
+    unsigned int mCount; //num elements (indices or vertices_
+    size_t mSize; //size of buffer
+    virtual GLenum getTarget() const = 0;
+public:
+    GraphicsBuffer();
+    ~GraphicsBuffer();
+    void allocateBuffer(const size_t size, const void* data, BufferUsage usage = STATIC);
+    void changeBufferSubData(const size_t offset, const size_t size, const void* data);
+    void bind() const;
+    void unbind() const;
+    unsigned int count() const;
+    size_t size() const;
+};
+
+class VertexBufferF: public GraphicsBuffer {
+private:
+    virtual GLenum getTarget() const override {return GL_ARRAY_BUFFER;}
+};
+class IndexBufferF: public GraphicsBuffer {
+private:
+    virtual GLenum getTarget() const override {return GL_ELEMENT_ARRAY_BUFFER;}
+};
+
 class VertexBuffer{
 private:
     unsigned int mBufferID;
@@ -21,7 +51,9 @@ private:
 public:
     VertexBuffer();
     ~VertexBuffer();
-    void putData(const void* data, const size_t size);
+    void createBuffer(const void* data, const size_t size);
+    void createBuffer(const void* data, const size_t size, BufferUsage usage);
+    void changeData();
     void bind() const;
     void unbind() const;
     size_t size() const;
@@ -75,7 +107,7 @@ public:
 class VertexArray {
 private:
     unsigned int mArrayID;
-    std::unordered_set<std::shared_ptr<const VertexBuffer>> referencedBuffers;
+    std::unordered_set<std::shared_ptr<const VertexBuffer>> mReferencedBuffers;
 public:
     VertexArray();
     ~VertexArray();
@@ -83,7 +115,11 @@ public:
     // uses default layout
     void addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout);
     // uses shader layout
-    void addBuffer(const VertexBuffer &vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames);
+    void addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames);
+
+    std::unordered_set<std::shared_ptr<const VertexBuffer>>& referencedBuffers(){
+        return mReferencedBuffers;
+    }
 
     void bind() const;
     void unbind() const;
@@ -102,6 +138,7 @@ private:
 
 public:
     GraphicsData(const std::string &fileName);
+    GraphicsData(std::shared_ptr<VertexArray> vertexArray, std::shared_ptr<IndexBuffer> indexBuffer);
 
     GraphicsData(const std::vector<float> &vertices);
     GraphicsData(const std::vector<float> &vertices, const std::vector<unsigned int> &indices);

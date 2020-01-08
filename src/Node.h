@@ -18,35 +18,29 @@ public:
     Viewport();
     Viewport(const int x, const int y, const int width, const int height);
 
-    int x(){ return mX; }
-    int x2(){ return mX+mWidth; }
-    int y(){ return mY; }
-    int y2(){ return mY+mHeight; }
-    int width(){ return mWidth; }
-    int height(){ return mHeight; }
+    int x() const { return mX; }
+    int x2()const{ return mX+mWidth; }
+    int y()const{ return mY; }
+    int y2()const{ return mY+mHeight; }
+    int width()const{ return mWidth; }
+    int height()const{ return mHeight; }
+
+    void bind()const{glViewport(mX,mY,mWidth,mHeight);};
 };
 
 class Window;
 
 class Node {
 private:
-    Window& mWindow;
+    std::shared_ptr<Window> mWindow;
     std::unordered_set<std::shared_ptr<Node> > mChildren;
 
 protected:
-    Viewport mViewport;
-    void addChild(Node& node);
-    void removeChild(Node& node);
+    void addChild(std::shared_ptr<Node> node);
+    void removeChild(std::shared_ptr<Node> node);
 
 public:
-    Node(Window& window);
+    Node(std::shared_ptr<Window> window);
     virtual ~Node();
-
-    virtual void setViewport(const Viewport& viewport);
-
-
-
-    void renderNode();
-
-    virtual void render() = 0;
+    virtual void render(const Viewport& viewport) = 0;
 };

@@ -80,10 +80,12 @@ private:
         int width, height;
         window->getFramebufferSize(width, height);
 
+        glm::mat4 projectionView = camera.computePerspectiveProjectionMatrix((float) width / height) * camera.computeViewMatrix();
+        basicShader->setUniform("projectionView", projectionView);
 
-        basicShader->setUniform("projectionView", camera.computePerspectiveProjectionMatrix((float) width / height) *
-                                                 camera.computeViewMatrix());
-        renderer->clear(width, height, *basicShader);
+
+        renderer->clear(width, height);
+        renderer->renderAxis(projectionView);
 
         glm::mat4 model(1.0f);
 
