@@ -1,7 +1,7 @@
 #shader vertex
 
 #version 330 core
-in vec3 vPos;
+layout(location = 0) in vec3 vPos;
 
 void main()
 {

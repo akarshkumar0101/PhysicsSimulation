@@ -20,7 +20,6 @@
 #include <imgui_impl_glfw.h>
 
 #include "Shader.h"
-#include "ModelGraphicsData.h"
 #include "Camera.h"
 #include "Renderer.h"
 #include "PhysicsSimulation.h"
@@ -34,20 +33,22 @@ private:
     Camera camera;
     Renderer *renderer;
     PhysicsSimulation& simulation;
-    std::vector<ModelGraphicsData *> modelDatas;
+    std::vector<GraphicsData *> modelDatas;
 
 public:
     SimulationDisplay(PhysicsSimulation& simulation):camera(glm::vec3(0.0, 0.0, 15.0), glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, 1.0, 0.0)), simulation(simulation){
         window = new Window(500,500,"new window dog");
 
+        VertexBufferLayout::initCommonLayouts();
+        CommonModels::initCommonModels();
+
         renderer = new Renderer(true, false);
         basicShader = new Shader("resources/shaders/basic.shader");
 
-        CommonModels::initCommonModels();
-        VertexBufferLayout::initCommonLayouts();
+
 
         for (RigidBody rm: simulation.models()) {
-            modelDatas.push_back(new ModelGraphicsData(rm));
+            modelDatas.push_back(new GraphicsData(rm));
         }
     }
 
@@ -78,10 +79,11 @@ private:
         //SET VIEW PORT
         int width, height;
         window->getFramebufferSize(width, height);
-        renderer->clear(width, height, *basicShader);
+
 
         basicShader->setUniform("projectionView", camera.computePerspectiveProjectionMatrix((float) width / height) *
                                                  camera.computeViewMatrix());
+        renderer->clear(width, height, *basicShader);
 
         glm::mat4 model(1.0f);
 
@@ -142,9 +144,9 @@ private:
         double xOffset = xPos - lastXPos;
         double yOffset = yPos - lastYPos;
 
-        if (window->cursorIsInWindow()) {
+//        if (window->cursorIsInWindow()) {
             camera.look(xOffset, yOffset);
-        }
+//        }
 
         lastXPos = xPos;
         lastYPos = yPos;

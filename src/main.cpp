@@ -35,25 +35,33 @@ int simulation(){
     return 0;
 }
 
-void testingOpenGL(){
+void testLines(){
     Window window(900,900, "hey window");
-    float vertices[] = {0,0,0,1,1,0,1,0,0};
-
-    VertexBuffer vb(vertices, sizeof(vertices));
-    VertexBufferLayout vbl;
-    vbl.addElement<float>(3,"vPos");
-
+    VertexBufferLayout::initCommonLayouts();
+    CommonModels::initCommonModels();
 
     Shader shader("./resources/shaders/triangle.shader");
+
+    std::vector<float> vertices({0,0,0});
+    std::vector<unsigned int> indices;
+    for(float deg=0;deg<2*M_PI;deg+=0.2){
+        vertices.insert(vertices.end(),{(float) cos(deg),(float) sin(deg),0.0f});
+    }
+    for(unsigned int i=1; i <vertices.size();i++){
+        indices.insert(indices.end(), {0, i});
+    }
+
+
+    GraphicsData gd(vertices, indices);
 
     glClearColor(0.0,0.0,0.0,1.0);
     while(!window.shouldClose()){
         glClear(GL_COLOR_BUFFER_BIT);
         shader.bind();
-        vb.bind();
-        vbl.bindVertexAttributesToShader(shader);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        gd.bind();
+
+        glDrawElements(GL_LINES, gd.indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
 
         window.swapBuffers();
         window.pollEvents();
@@ -61,12 +69,11 @@ void testingOpenGL(){
 }
 int main() {
 //    testingOpenGL();
-//    if(true) return 0 ;
-    try{
+//    try{
         simulation();
-    }catch(std::string exp){
-        std::cout<<exp<<std::endl;
-    }
+//    }catch(std::string exp){
+//        std::cout<<exp<<std::endl;
+//    }
 
 //    Window window(900,900, "dog window");
 //

@@ -5,7 +5,7 @@
 uniform mat4 model;
 uniform mat4 projectionView;
 
-in vec3 vPos;
+layout(location = 0) in vec3 vPos;
 
 void main()
 {

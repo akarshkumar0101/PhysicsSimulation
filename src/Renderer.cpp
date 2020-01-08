@@ -19,23 +19,23 @@ unsigned int axisIndices[3][2]={
         {4,5},
 };
 
-VertexBuffer* vb = nullptr;
 IndexBuffer* ib[3];
-VertexBufferLayout* vbl = nullptr;
+std::shared_ptr<VertexArray> va(nullptr);
 
 void initAxis() {
-    vb = new VertexBuffer(axisVertices, sizeof(axisVertices));
+    auto vb = std::make_shared<VertexBuffer>();
+    vb->putData(axisVertices, sizeof(axisVertices));
+    va = std::make_shared<VertexArray>();
+    va->addBuffer(vb, *VertexBufferLayout::coordinateOnlyLayout);
+
     for (int i = 0; i < 3; i++) {
-        ib[i] = new IndexBuffer(axisIndices[i], 2);
+        ib[i] = new IndexBuffer();
+        ib[i]->putData(axisIndices[i], 2);
     }
-    vbl = new VertexBufferLayout();
-    vbl->addElement<float>(3, "vPos");
 }
 
-void Renderer::drawAxis(const Shader &shader) {
+void Renderer::renderAxis(const Shader &shader) {
     shader.bind();
-    vb->bind();
-    vbl->bindVertexAttributesToShader(shader);
 
     for(int i=0;i<3;i++){
         glm::vec4 color(0.0);
@@ -43,6 +43,8 @@ void Renderer::drawAxis(const Shader &shader) {
         color[3] = 1.0;
         shader.setUniform("solidColor", color);
 
+
+        va->bind();
         ib[i]->bind();
 
         glDrawElements(GL_LINES, ib[i]->count(), GL_UNSIGNED_INT, nullptr);
@@ -56,7 +58,7 @@ void Renderer::clear(int width, int height, const Shader &shader){
     if (mAxis) {
         glm::mat4 model(1.0f);
         shader.setUniform("model", model);
-        drawAxis(shader);
+        renderAxis(shader);
     }
 }
 
@@ -90,13 +92,6 @@ void Renderer::renderForce(const Force &force, const Point &position, const Shad
     float forceMag = glm::length(force);
     glm::mat4 model(1.0);
 
-//        float yaw = glm::atan(force.y,force.x);
-//        float pitch = glm::asin(force.z);
-//        float roll = 0;
-//        glm::quat q(glm::vec3(yaw,pitch,roll));
-//        glm::mat4 rotate = glm::toMat4(q);
-
-
     model = glm::translate(model,position);
 
 
@@ -108,8 +103,6 @@ void Renderer::renderForce(const Force &force, const Point &position, const Shad
     rotate = glm::inverse(rotate);
     model = model*rotate*scaleZ*toZ;
 
-    //model = rotate*model;
-
     shader.setUniform("model", model);
 
 
@@ -117,32 +110,26 @@ void Renderer::renderForce(const Force &force, const Point &position, const Shad
 }
 
 
-void Renderer::renderTriangleWise(const ModelGraphicsData &modelData, const Shader &shader) {
+void Renderer::renderTriangleWise(const GraphicsData &modelData, const Shader &shader) {
     shader.bind();
 
-    modelData.vertexBuffer()->bind();
-    modelData.indexBuffer()->bind();
-    modelData.vertexBufferLayout()->bindVertexAttributesToShader(shader);
+    modelData.bind();
 
     glDrawElements(GL_TRIANGLES, modelData.indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::renderLineWise(const ModelGraphicsData &modelData, const Shader &shader) {
+void Renderer::renderLineWise(const GraphicsData &modelData, const Shader &shader) {
     shader.bind();
 
-    modelData.vertexBuffer()->bind();
-    modelData.indexBuffer()->bind();
-    modelData.vertexBufferLayout()->bindVertexAttributesToShader(shader);
+    modelData.bind();
 
     glDrawElements(GL_LINES, modelData.indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
 }
 
-void Renderer::renderRigidBody(const ModelGraphicsData& modelData, const RigidBody &rigidBody, const ModelGraphicsData &jointModel, const Shader &shader) {
+void Renderer::renderRigidBody(const GraphicsData& modelData, const RigidBody &rigidBody, const GraphicsData &jointModel, const Shader &shader) {
     shader.setUniform("solidColor", glm::vec4(0.0, 0.0, 0.0, 1.0));
 
-//    glm::mat4 modelMatrix = rigidBody.pose().transformation();
     glm::mat4 modelMatrix = rigidBody.transformation();
-
     shader.setUniform("model", modelMatrix);
 
     renderLineWise(modelData, shader);

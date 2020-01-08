@@ -15,7 +15,7 @@ add_executable(${PROJECT_NAME}
         src/main.cpp
         #src/testing.cpp
         #src/imguiAndOpenGL.cpp
-        src/math/Vector.h src/math/VectorOps.h src/math/Matrix.h src/math/MatrixOps.h src/RigidBody.h src/PhysicsSimulation.h src/math/Quaternion.h src/Physics.h src/math/QuaternionOps.h src/SimulationDisplay.h src/Shader.h src/ModelGraphicsData.h src/Camera.h src/Renderer.h src/GraphicsBuffer.h src/Shader.cpp src/GraphicsBuffer.cpp src/Window.cpp src/Window.h src/Camera.cpp src/Renderer.cpp src/ModelGraphicsData.cpp src/RigidBody.cpp
+        src/math/Vector.h src/math/VectorOps.h src/math/Matrix.h src/math/MatrixOps.h src/RigidBody.h src/PhysicsSimulation.h src/math/Quaternion.h src/Physics.h src/math/QuaternionOps.h src/SimulationDisplay.h src/Shader.h src/Camera.h src/Renderer.h src/GraphicsBuffer.h src/Shader.cpp src/GraphicsBuffer.cpp src/Window.cpp src/Window.h src/Camera.cpp src/Renderer.cpp src/RigidBody.cpp
         src/Node.h src/Node.cpp src/GridNode.cpp src/GridNode.h src/DrawingNode.cpp src/DrawingNode.h
         )
 

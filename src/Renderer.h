@@ -4,9 +4,8 @@
 
 #pragma once
 
-#include "ModelGraphicsData.h"
 #include "Shader.h"
-
+#include "GraphicsBuffer.h"
 
 extern float axisVertices[18];
 
@@ -19,7 +18,7 @@ void initAxis();
 
 class Renderer{
 private:
-    void drawAxis(const Shader& shader);
+    void renderAxis(const Shader& shader);
     bool mAxis;
     bool mWireFrame;
 
@@ -28,10 +27,10 @@ public:
 
     void clear(int width, int height, const Shader& shader);
 
-    void renderTriangleWise(const ModelGraphicsData& modelData, const Shader& shader);
-    void renderLineWise(const ModelGraphicsData& modelData, const Shader& shader);
+    void renderTriangleWise(const GraphicsData& modelData, const Shader& shader);
+    void renderLineWise(const GraphicsData& modelData, const Shader& shader);
 
-    void renderRigidBody(const ModelGraphicsData& modelData, const RigidBody &rigidBody, const ModelGraphicsData &jointModel, const Shader &shader);
+    void renderRigidBody(const GraphicsData& modelData, const RigidBody &rigidBody, const GraphicsData &jointModel, const Shader &shader);
 
     void renderForce(const Force& force, const Point& position, const Shader& shader);
 };

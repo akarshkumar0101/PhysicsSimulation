@@ -9,19 +9,22 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <vector>
+#include <unordered_set>
 
 #include "Shader.h"
+#include "RigidBody.h"
 
 class VertexBuffer{
 private:
     unsigned int mBufferID;
-    unsigned int mSize;
+    size_t mSize;
 public:
     VertexBuffer();
-    VertexBuffer(const void* data, const size_t size);
     ~VertexBuffer();
-    void bind();
-    void unbind();
+    void putData(const void* data, const size_t size);
+    void bind() const;
+    void unbind() const;
+    size_t size() const;
 };
 
 class IndexBuffer{
@@ -30,51 +33,98 @@ private:
     unsigned int mCount;
 public:
     IndexBuffer();
-    IndexBuffer(const unsigned int* data, const unsigned int count);
     ~IndexBuffer();
-    void bind();
-    void unbind();
-
-    unsigned int count(){
-        return mCount;
-    }
+    void putData(const unsigned int* data, const unsigned int count);
+    void bind() const;
+    void unbind() const;
+    unsigned int count() const;
 };
 
 struct VertexBufferElement {
-    unsigned int type;
+    static size_t sizeofType(unsigned int type);
+
+    unsigned int type; //represents OpenGL type
     unsigned int count;
     unsigned char normalized;
-
-    std::string shaderAttributeName;
-
-    static size_t sizeofType(int type);
 };
 
-class VertexBufferLayout{
+class VertexBufferLayout {
 private:
     //vertex array object
-    unsigned int mBufferID;
     std::vector<VertexBufferElement> mElements;
     size_t mStride;
 public:
-    static VertexBufferLayout* vertexOnlyLayout;
+    static VertexBufferLayout* coordinateOnlyLayout;
     static void initCommonLayouts();
     static void destroyCommonLayouts();
 
     VertexBufferLayout();
     VertexBufferLayout(const std::vector<VertexBufferElement>& elements );
-    template<int N>
-    VertexBufferLayout(const std::array<VertexBufferElement,N>& elements);
 
-    void addElement(VertexBufferElement e);
-    void addElement(const unsigned int type,const unsigned int count, const unsigned char normalized, const std::string& shaderAttributeName);
+    void addElement(const VertexBufferElement &e);
+    void addElement(const unsigned int type, const unsigned int count, const unsigned char normalized);
 
     template<class T>
-    void addElement(const unsigned int count, const std::string shaderAttributeName);
+    void addElement(const unsigned int count);
 
-    void bindVertexAttributesToShader(const Shader& shader) const;
+    const std::vector<VertexBufferElement>& elements() const;
+    size_t stride() const;
+};
+
+//
+class VertexArray {
+private:
+    unsigned int mArrayID;
+    std::unordered_set<std::shared_ptr<const VertexBuffer>> referencedBuffers;
+public:
+    VertexArray();
+    ~VertexArray();
+
+    // uses default layout
+    void addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout);
+    // uses shader layout
+    void addBuffer(const VertexBuffer &vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames);
+
+    void bind() const;
+    void unbind() const;
 };
 
 
+class GraphicsData {
+private:
+    std::shared_ptr<VertexArray> mVertexArray;
+    std::shared_ptr<IndexBuffer> mIndexBuffer;
 
+
+    void loadFromFile(const std::string &fileName);
+    void initBuffers(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
+    static std::vector<unsigned int> defaultListOfIndices(const std::vector<float> &vertices) ;
+
+public:
+    GraphicsData(const std::string &fileName);
+
+    GraphicsData(const std::vector<float> &vertices);
+    GraphicsData(const std::vector<float> &vertices, const std::vector<unsigned int> &indices);
+
+    GraphicsData(const RigidBody &model);
+
+    ~GraphicsData();
+
+    std::shared_ptr<IndexBuffer> indexBuffer() const{
+        return mIndexBuffer;
+    }
+
+    void bind() const;
+    void unbind() const;
+
+};
+namespace CommonModels{
+    extern GraphicsData* teapotModel;
+    extern GraphicsData* squareModel;
+    extern GraphicsData* cubeModel;
+    extern GraphicsData* arrowModel;
+
+    void initCommonModels();
+    void destroyCommonModels();
+}
 
