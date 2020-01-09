@@ -82,7 +82,12 @@ void VertexBufferLayout::addElement<unsigned char>(unsigned int count){
     addElement(GL_UNSIGNED_BYTE, count, GL_FALSE);
 }
 
-std::shared_ptr<VertexBufferLayout> VertexBufferLayout::coordinateOnlyLayout(){
+std::shared_ptr<VertexBufferLayout> VertexBufferLayout::coordinate2DOnlyLayout(){
+    static auto vbl = std::make_shared<VertexBufferLayout>(std::vector<VertexBufferElement>({{GL_FLOAT, 2, false}}));
+    return vbl;
+}
+
+std::shared_ptr<VertexBufferLayout> VertexBufferLayout::coordinate3DOnlyLayout(){
     static auto vbl = std::make_shared<VertexBufferLayout>(std::vector<VertexBufferElement>({{GL_FLOAT, 3, false}}));
     return vbl;
 }
@@ -176,7 +181,7 @@ void GraphicsData::initBuffers(const std::vector<float>& vertices, const std::ve
     vertexBuffer->allocateBuffer(vertices.size()/3,vertices);
 
     mVertexArray = std::make_shared<VertexArray>();
-    mVertexArray->addBufferWithDefaultLayout(vertexBuffer, *VertexBufferLayout::coordinateOnlyLayout());
+    mVertexArray->addBufferWithDefaultLayout(vertexBuffer, *VertexBufferLayout::coordinate3DOnlyLayout());
 
     mIndexBuffer = std::make_shared<IndexBuffer>();
     mIndexBuffer->allocateBuffer(indices);

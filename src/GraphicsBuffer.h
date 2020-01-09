@@ -64,7 +64,8 @@ private:
     std::vector<VertexBufferElement> mElements;
     size_t mStride;
 public:
-    static std::shared_ptr<VertexBufferLayout> coordinateOnlyLayout();
+    static std::shared_ptr<VertexBufferLayout> coordinate2DOnlyLayout();
+    static std::shared_ptr<VertexBufferLayout> coordinate3DOnlyLayout();
 
     VertexBufferLayout();
     VertexBufferLayout(const std::vector<VertexBufferElement>& elements );

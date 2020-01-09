@@ -6,41 +6,99 @@
 #include "GraphicsBuffer.h"
 
 
-static Shader& drawingShader(){
-    static Shader drawingShader("resources/shaders/drawingNodeShader.shader");
+static auto drawingShader(){
+    static auto drawingShader = std::make_shared<Shader>("resources/shaders/drawingNodeShader.shader");
     return drawingShader;
-}
-
-static VertexArray& pointArray2D() {
-    static bool first = true;
-    static VertexArray va;
-    static auto vb = std::make_shared<VertexBuffer>();
-
-    if (first) {
-        vb->GraphicsBuffer::allocateBuffer(1,3 * sizeof(float));
-
-        VertexBufferLayout vbl;
-        vbl.addElement<float>(3);
-
-        va.addBufferWithDefaultLayout(vb, vbl);
-
-        first = false;
-    }
-
-    return va;
 }
 
 
 void Graphics::drawPoint(float x, float y) {
-//    (*pointArray2D().referencedBuffers().begin())
+    static bool first = true;
+    static auto vb = std::make_shared<VertexBuffer>();
+    static auto va = std::make_shared<VertexArray>();
+    if(first){
+        first = false;
+        vb->GraphicsBuffer::allocateBuffer(1,1*2*sizeof(float),nullptr,BufferUsage::DYNAMIC);
+        va->addBufferWithShaderAttributes(vb, *VertexBufferLayout::coordinate2DOnlyLayout(), *drawingShader(), {"vPos"});
+    }
+    float data[] = {x,y};
+    vb->GraphicsBuffer::changeBufferSubData(0,sizeof(data), data);
+
+    drawingShader()->bind();
+    drawingShader()->setUniform("transform", glm::mat4(1.0));
+    va->bind();
+    glDrawArrays(GL_POINTS,0,1);
 }
 
 void Graphics::drawLine(float x1, float y1, float x2, float y2) {
+    static bool first = true;
+    static auto vb = std::make_shared<VertexBuffer>();
+    static auto va = std::make_shared<VertexArray>();
+    if(first){
+        first = false;
+        vb->GraphicsBuffer::allocateBuffer(2,2*2*sizeof(float),nullptr,BufferUsage::DYNAMIC);
+        va->addBufferWithShaderAttributes(vb, *VertexBufferLayout::coordinate2DOnlyLayout(), *drawingShader(), {"vPos"});
+    }
+    float data[] = {x1,y1,x2,y2};
+    vb->GraphicsBuffer::changeBufferSubData(0,sizeof(data), data);
 
+    drawingShader()->bind();
+    drawingShader()->setUniform("transform", glm::mat4(1.0));
+    va->bind();
+    glDrawArrays(GL_LINES,0,2);
 }
 
 void Graphics::fillTriangle(float x1, float y1, float x2, float y2, float x3, float y3) {
+    static bool first = true;
+    static auto vb = std::make_shared<VertexBuffer>();
+    static auto va = std::make_shared<VertexArray>();
+    if(first){
+        first = false;
+        vb->GraphicsBuffer::allocateBuffer(3,3*2*sizeof(float),nullptr,BufferUsage::DYNAMIC);
+        va->addBufferWithShaderAttributes(vb, *VertexBufferLayout::coordinate2DOnlyLayout(), *drawingShader(), {"vPos"});
+    }
+    float data[] = {x1,y1,x2,y2,x3, y3};
+    vb->GraphicsBuffer::changeBufferSubData(0,sizeof(data), data);
 
+    drawingShader()->bind();
+    drawingShader()->setUniform("transform", glm::mat4(1.0));
+    va->bind();
+    glDrawArrays(GL_TRIANGLES,0,3);
+}
+static auto computeCircleVertices(int increments){
+    auto vector = std::make_shared<std::vector<float>>();
+    vector->insert(vector->end(), {0,0});
+    for(int i=0;i <increments;i++){
+        float deg = i*2.0f*M_PI / (increments-1);
+        vector->push_back(cos(deg));
+        vector->push_back(sin(deg));
+    }
+    return vector;
+}
+
+#define CIRCLE_NUM_PARTITIONS 100
+
+void Graphics::fillCircle(float cx, float cy, float r){
+    static bool first = true;
+    static auto vb = std::make_shared<VertexBuffer>();
+    static auto va = std::make_shared<VertexArray>();
+    if(first){
+        first = false;
+        vb->allocateBuffer(CIRCLE_NUM_PARTITIONS+1, *computeCircleVertices(CIRCLE_NUM_PARTITIONS));
+        va->addBufferWithShaderAttributes(vb, *VertexBufferLayout::coordinate2DOnlyLayout(), *drawingShader(), {"vPos"});
+    }
+    glm::mat4 transform(1.0);
+    transform = glm::translate(transform, glm::vec3(cx,cy,0.0));
+    transform = glm::scale(transform, glm::vec3(r,r,1.0));
+
+
+    drawingShader()->bind();
+    drawingShader()->setUniform("transform", transform);
+    va->bind();
+    glDrawArrays(GL_TRIANGLE_FAN,0,CIRCLE_NUM_PARTITIONS+1);
+}
+void Graphics::setColor(float r, float g, float b, float a) {
+    drawingShader()->setUniform("color", glm::vec4(r,g,b,a));
 }
 
 DrawingNode::DrawingNode(std::shared_ptr<Window> window, DrawingFunction drawingFunction): Node(window), mDrawingFunction(drawingFunction) {

@@ -30,6 +30,8 @@ public:
     void drawLine(float x1, float y1, float x2, float y2);
 //    void outlineTriangle(float x1, float y1, float x2, float y2, float x3, float y3);
     void fillTriangle(float x1, float y1, float x2, float y2, float x3, float y3);
+    void fillCircle(float cx, float cy, float r);
+    void setColor(float r, float g, float b, float a);
 };
 
 using DrawingFunction = void (*)(Graphics& graphics);
