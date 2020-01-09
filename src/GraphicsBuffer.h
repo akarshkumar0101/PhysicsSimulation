@@ -19,15 +19,15 @@ enum BufferUsage{
 };
 
 class GraphicsBuffer {
-private:
+protected:
     const unsigned int mBufferID;
-    unsigned int mCount; //num elements (indices or vertices_
+    unsigned int mCount; //num elements (indices or vertices)
     size_t mSize; //size of buffer
     virtual GLenum getTarget() const = 0;
 public:
     GraphicsBuffer();
     ~GraphicsBuffer();
-    void allocateBuffer(const size_t size, const void* data, BufferUsage usage = STATIC);
+    void allocateBuffer(const unsigned int count, const size_t size, const void* data = nullptr, BufferUsage usage = STATIC);
     void changeBufferSubData(const size_t offset, const size_t size, const void* data);
     void bind() const;
     void unbind() const;
@@ -35,49 +35,27 @@ public:
     size_t size() const;
 };
 
-class VertexBufferF: public GraphicsBuffer {
+class VertexBuffer: public GraphicsBuffer {
 private:
     virtual GLenum getTarget() const override {return GL_ARRAY_BUFFER;}
+public:
+    void allocateBuffer(const unsigned int count, const std::vector<float>& vertexData, BufferUsage usage = STATIC);
 };
-class IndexBufferF: public GraphicsBuffer {
+class IndexBuffer: public GraphicsBuffer {
 private:
     virtual GLenum getTarget() const override {return GL_ELEMENT_ARRAY_BUFFER;}
+public:
+    void allocateBuffer(const std::vector<unsigned int>& indexData, BufferUsage usage = STATIC);
 };
 
-class VertexBuffer{
-private:
-    unsigned int mBufferID;
-    size_t mSize;
-public:
-    VertexBuffer();
-    ~VertexBuffer();
-    void createBuffer(const void* data, const size_t size);
-    void createBuffer(const void* data, const size_t size, BufferUsage usage);
-    void changeData();
-    void bind() const;
-    void unbind() const;
-    size_t size() const;
-};
 
-class IndexBuffer{
-private:
-    unsigned int mBufferID;
-    unsigned int mCount;
-public:
-    IndexBuffer();
-    ~IndexBuffer();
-    void putData(const unsigned int* data, const unsigned int count);
-    void bind() const;
-    void unbind() const;
-    unsigned int count() const;
-};
 
 struct VertexBufferElement {
-    static size_t sizeofType(unsigned int type);
-
     unsigned int type; //represents OpenGL type
     unsigned int count;
     unsigned char normalized;
+
+    static size_t sizeofType(unsigned int type);
 };
 
 class VertexBufferLayout {
@@ -86,9 +64,7 @@ private:
     std::vector<VertexBufferElement> mElements;
     size_t mStride;
 public:
-    static VertexBufferLayout* coordinateOnlyLayout;
-    static void initCommonLayouts();
-    static void destroyCommonLayouts();
+    static std::shared_ptr<VertexBufferLayout> coordinateOnlyLayout();
 
     VertexBufferLayout();
     VertexBufferLayout(const std::vector<VertexBufferElement>& elements );
@@ -113,9 +89,9 @@ public:
     ~VertexArray();
 
     // uses default layout
-    void addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout);
+    void addBufferWithDefaultLayout(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout);
     // uses shader layout
-    void addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames);
+    void addBufferWithShaderAttributes(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames);
 
     std::unordered_set<std::shared_ptr<const VertexBuffer>>& referencedBuffers(){
         return mReferencedBuffers;
@@ -131,10 +107,8 @@ private:
     std::shared_ptr<VertexArray> mVertexArray;
     std::shared_ptr<IndexBuffer> mIndexBuffer;
 
-
     void loadFromFile(const std::string &fileName);
     void initBuffers(const std::vector<float>& vertices, const std::vector<unsigned int>& indices);
-    static std::vector<unsigned int> defaultListOfIndices(const std::vector<float> &vertices) ;
 
 public:
     GraphicsData(const std::string &fileName);
@@ -156,12 +130,9 @@ public:
 
 };
 namespace CommonModels{
-    extern GraphicsData* teapotModel;
-    extern GraphicsData* squareModel;
-    extern GraphicsData* cubeModel;
-    extern GraphicsData* arrowModel;
-
-    void initCommonModels();
-    void destroyCommonModels();
+    std::shared_ptr<GraphicsData> teapotModel();
+    std::shared_ptr<GraphicsData> squareModel();
+    std::shared_ptr<GraphicsData> cubeModel();
+    std::shared_ptr<GraphicsData> arrowModel();
 }
 

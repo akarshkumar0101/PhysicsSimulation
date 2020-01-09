@@ -5,71 +5,43 @@
 #include <fstream>
 #include "GraphicsBuffer.h"
 
-VertexBuffer::VertexBuffer(): mBufferID(0), mSize(0){
-    glGenBuffers(1, &mBufferID);
-}
-VertexBuffer::~VertexBuffer(){
-    glDeleteBuffers(1, &mBufferID);
-}
-
-void VertexBuffer::bind() const{
-    glBindBuffer(GL_ARRAY_BUFFER, mBufferID);
-}
-void VertexBuffer::unbind() const{
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-}
-void VertexBuffer::createBuffer(const void* data, const size_t size) {
-    createBuffer(data, size, STATIC);
-}
-void VertexBuffer::createBuffer(const void* data, const size_t size, BufferUsage usage) {
-    mSize = size;
-    bind();
-    GLenum glUsage;
+static GLenum toGLBufferUsage(BufferUsage usage){
     switch(usage) {
-        case STATIC: {
-            glUsage = GL_STATIC_DRAW;
-            break;
-        }
-        case DYNAMIC:{
-            glUsage = GL_DYNAMIC_DRAW;
-            break;
-        }
+        case STATIC:return GL_STATIC_DRAW;
+        case DYNAMIC:return GL_DYNAMIC_DRAW;
     }
-
-    glBufferData(GL_ARRAY_BUFFER, mSize, data, glUsage);
-    unbind();
-
-    glBufferSubData(GL_ARRAY_BUFFER, 24, 89, nullptr);
 }
 
+static unsigned int generateBufferOpenGLBuffer(){ unsigned int bufferID; glGenBuffers(1, &bufferID); return bufferID; }
 
-size_t VertexBuffer::size() const{
-    return mSize;
-}
-
-
-IndexBuffer::IndexBuffer(): mBufferID(0), mCount(0){
-    glGenBuffers(1, &mBufferID);
-}
-IndexBuffer::~IndexBuffer(){
+GraphicsBuffer::GraphicsBuffer():mBufferID(generateBufferOpenGLBuffer()), mSize(0), mCount(0) {}
+GraphicsBuffer::~GraphicsBuffer(){
     glDeleteBuffers(1, &mBufferID);
 }
-void IndexBuffer::putData(const unsigned int* data, const unsigned int count){
-    mCount = count;
+void GraphicsBuffer::allocateBuffer(const unsigned int count, const size_t size, const void* data, BufferUsage usage){
     bind();
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mCount*sizeof(unsigned int), data, GL_STATIC_DRAW);
+    glBufferData(getTarget(), size, data, toGLBufferUsage(usage));
+    mSize = size;
+    mCount = count;
     unbind();
 }
-void IndexBuffer::bind() const{
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mBufferID);
+void GraphicsBuffer::changeBufferSubData(const size_t offset, const size_t size, const void* data){
+    bind();
+    glBufferSubData(getTarget(), offset, size, data);
+    unbind();
 }
-void IndexBuffer::unbind() const{
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-unsigned int IndexBuffer::count() const{
-    return mCount;
-}
+void GraphicsBuffer::bind() const{glBindBuffer(getTarget(), mBufferID);}
+void GraphicsBuffer::unbind() const{glBindBuffer(getTarget(), 0);}
+unsigned int GraphicsBuffer::count() const{return mCount;}
+size_t GraphicsBuffer::size() const{return mSize;}
 
+
+void VertexBuffer::allocateBuffer(const unsigned int count, const std::vector<float> &vertexData, BufferUsage usage) {
+    GraphicsBuffer::allocateBuffer(count, vertexData.size()*sizeof(float), vertexData.data(), usage);
+}
+void IndexBuffer::allocateBuffer(const std::vector<unsigned int> &indexData, BufferUsage usage) {
+    GraphicsBuffer::allocateBuffer(indexData.size(), indexData.size()*sizeof(unsigned int), indexData.data(), usage);
+}
 
 
 size_t VertexBufferElement::sizeofType(unsigned int type){
@@ -110,14 +82,9 @@ void VertexBufferLayout::addElement<unsigned char>(unsigned int count){
     addElement(GL_UNSIGNED_BYTE, count, GL_FALSE);
 }
 
-VertexBufferLayout* VertexBufferLayout::coordinateOnlyLayout = nullptr;
-
-void VertexBufferLayout::initCommonLayouts() {
-    coordinateOnlyLayout = new VertexBufferLayout({{GL_FLOAT, 3, false}});
-}
-
-void VertexBufferLayout::destroyCommonLayouts() {
-    delete coordinateOnlyLayout;
+std::shared_ptr<VertexBufferLayout> VertexBufferLayout::coordinateOnlyLayout(){
+    static auto vbl = std::make_shared<VertexBufferLayout>(std::vector<VertexBufferElement>({{GL_FLOAT, 3, false}}));
+    return vbl;
 }
 
 const std::vector<VertexBufferElement> &VertexBufferLayout::elements() const{
@@ -134,7 +101,7 @@ VertexArray::~VertexArray(){
     glDeleteVertexArrays(1, &mArrayID);
 }
 
-void VertexArray::addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout){
+void VertexArray::addBufferWithDefaultLayout(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout){
 //    mReferencedBuffers.insert(std::shared_ptr<VertexBuffer>(&vertexBuffer));
     mReferencedBuffers.insert(vertexBuffer);
 
@@ -154,7 +121,7 @@ void VertexArray::addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, co
 }
 
 
-void VertexArray::addBuffer(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames){
+void VertexArray::addBufferWithShaderAttributes(const std::shared_ptr<VertexBuffer> vertexBuffer, const VertexBufferLayout &vertexBufferLayout, const Shader& shader, const std::vector<std::string>& attributeNames){
     mReferencedBuffers.insert(vertexBuffer);
     bind();
     vertexBuffer->bind();
@@ -205,22 +172,14 @@ void GraphicsData::loadFromFile(const std::string &fileName) {
 
 void GraphicsData::initBuffers(const std::vector<float>& vertices, const std::vector<unsigned int>& indices) {
 //    mVertexBuffer = new VertexBuffer(mVertices.data(), mVertices.size() * sizeof(float));
-    mIndexBuffer = std::make_shared<IndexBuffer>();
-    mIndexBuffer->putData(indices.data(), indices.size());
-
     std::shared_ptr<VertexBuffer> vertexBuffer = std::make_shared<VertexBuffer>();
-    vertexBuffer->createBuffer(vertices.data(), vertices.size() * sizeof(float));
+    vertexBuffer->allocateBuffer(vertices.size()/3,vertices);
 
     mVertexArray = std::make_shared<VertexArray>();
-    mVertexArray->addBuffer(vertexBuffer, *VertexBufferLayout::coordinateOnlyLayout);
-}
+    mVertexArray->addBufferWithDefaultLayout(vertexBuffer, *VertexBufferLayout::coordinateOnlyLayout());
 
-std::vector<unsigned int> GraphicsData::defaultListOfIndices(const std::vector<float> &vertices) {
-    std::vector<unsigned int> indices;
-    for (unsigned int i = 0; i < vertices.size(); i++) {
-        indices.push_back(i);
-    }
-    return indices;
+    mIndexBuffer = std::make_shared<IndexBuffer>();
+    mIndexBuffer->allocateBuffer(indices);
 }
 
 GraphicsData::GraphicsData(const std::string &fileName) {
@@ -230,7 +189,8 @@ GraphicsData::GraphicsData(std::shared_ptr<VertexArray> vertexArray, std::shared
 }
 
 GraphicsData::GraphicsData(const std::vector<float> &vertices) {
-    initBuffers(vertices, defaultListOfIndices(vertices));
+    //TODO implement this
+    throw "not implemented";
 }
 
 GraphicsData::GraphicsData(const std::vector<float> &vertices, const std::vector<unsigned int> &indices){
@@ -267,21 +227,20 @@ void GraphicsData::unbind() const{
 
 
 namespace CommonModels{
-    GraphicsData* teapotModel = nullptr;
-    GraphicsData* squareModel = nullptr;
-    GraphicsData* cubeModel = nullptr;
-    GraphicsData* arrowModel = nullptr;
-
-    void initCommonModels(){
-        teapotModel = new GraphicsData("resources/models/teapot.obj");
-        squareModel = new GraphicsData("resources/models/square.obj");
-        cubeModel = new GraphicsData("resources/models/cube.obj");
-        arrowModel = new GraphicsData("resources/models/arrow.obj");
+    std::shared_ptr<GraphicsData> teapotModel(){
+        static auto gd = std::make_shared<GraphicsData>("resources/models/teapot.obj");
+        return gd;
     }
-    void destroyCommonModels(){
-        delete teapotModel;
-        delete squareModel;
-        delete cubeModel;
-        delete arrowModel;
+    std::shared_ptr<GraphicsData> squareModel(){
+        static auto gd = std::make_shared<GraphicsData>("resources/models/square.obj");
+        return gd;
+    }
+    std::shared_ptr<GraphicsData> cubeModel(){
+        static auto gd = std::make_shared<GraphicsData>("resources/models/cube.obj");
+        return gd;
+    }
+    std::shared_ptr<GraphicsData> arrowModel(){
+        static auto gd = std::make_shared<GraphicsData>("resources/models/arrow.obj");
+        return gd;
     }
 }

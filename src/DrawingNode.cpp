@@ -17,12 +17,12 @@ static VertexArray& pointArray2D() {
     static auto vb = std::make_shared<VertexBuffer>();
 
     if (first) {
-        vb->createBuffer(nullptr, 3 * sizeof(float));
+        vb->GraphicsBuffer::allocateBuffer(1,3 * sizeof(float));
 
         VertexBufferLayout vbl;
         vbl.addElement<float>(3);
 
-        va.addBuffer(vb, vbl);
+        va.addBufferWithDefaultLayout(vb, vbl);
 
         first = false;
     }

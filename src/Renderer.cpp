@@ -4,53 +4,58 @@
 
 #include "Renderer.h"
 
-static float axisVertices[]={
-        -100.0,0.0,0.0,  1.0,0.0,0.0,1.0,
-        +100.0,0.0,0.0,  1.0,0.0,0.0,1.0,
-        0.0,-100.0,0.0,  0.0,1.0,0.0,1.0,
-        0.0,+100.0,0.0,  0.0,1.0,0.0,1.0,
-        0.0,0.0,-100.0,  0.0,0.0,1.0,1.0,
-        0.0,0.0,+100.0,  0.0,0.0,1.0,1.0,
-};
+static std::vector<float> axisVertices({-100.0,0.0,0.0,
+                                         +100.0,0.0,0.0,
+                                         0.0,-100.0,0.0,
+                                         0.0,+100.0,0.0,
+                                         0.0,0.0,-100.0,
+                                         0.0,0.0,+100.0,});
+static std::vector<float> vertexColors({1.0,0.0,0.0,1.0,
+                                        1.0,0.0,0.0,1.0,
+                                        0.0,1.0,0.0,1.0,
+                                        0.0,1.0,0.0,1.0,
+                                        0.0,0.0,1.0,1.0,
+                                        0.0,0.0,1.0,1.0,});
 
-static unsigned int axisIndices[3][2]={
-        {0,1},
-        {2,3},
-        {4,5},
-};
+static std::vector<unsigned int> axisIndices({2,3, 0,1, 4,5,});
 
-static IndexBuffer* ib[3];
+
+
+
 static std::shared_ptr<VertexArray> va(nullptr);
+static std::shared_ptr<IndexBuffer> ib(nullptr);
 
-static Shader* axisShader;
+static std::shared_ptr<Shader> axisShader;
 
 void initAxis() {
-    axisShader = new Shader("resources/shaders/axis.shader");
+    axisShader = std::make_shared<Shader>("resources/shaders/axis.shader");
 
     auto vb = std::make_shared<VertexBuffer>();
-    vb->createBuffer(axisVertices, sizeof(axisVertices));
-    va = std::make_shared<VertexArray>();
-    VertexBufferLayout vbl;
-    vbl.addElement<float>(3);
-    vbl.addElement<float>(4);
-    va->addBuffer(vb, vbl, *axisShader, {"vPos", "axisColor"});
+    vb->allocateBuffer(6,axisVertices);
+    auto vcb = std::make_shared<VertexBuffer>();
+    vcb->allocateBuffer(6,vertexColors);
 
-    for (int i = 0; i < 3; i++) {
-        ib[i] = new IndexBuffer();
-        ib[i]->putData(axisIndices[i], 2);
-    }
+    VertexBufferLayout vbl1;
+    vbl1.addElement<float>(3);
+    VertexBufferLayout vbl2;
+    vbl2.addElement<float>(4);
+
+    va = std::make_shared<VertexArray>();
+    va->addBufferWithShaderAttributes(vb, vbl1, *axisShader, {"vPos"});
+    va->addBufferWithShaderAttributes(vcb, vbl2, *axisShader, {"axisColor"});
+
+    ib = std::make_shared<IndexBuffer>();
+    ib->allocateBuffer(axisIndices);
 }
 
 void Renderer::renderAxis(const glm::mat4& projectionView) {
     axisShader->bind();
     axisShader->setUniform("projectionView", projectionView);
 
-    for(int i=0;i<3;i++){
-        va->bind();
-        ib[i]->bind();
+    va->bind();
+    ib->bind();
 
-        glDrawElements(GL_LINES, ib[i]->count(), GL_UNSIGNED_INT, nullptr);
-    }
+    glDrawElements(GL_LINES, ib->count(), GL_UNSIGNED_INT, nullptr);
 
 }
 
@@ -103,7 +108,7 @@ void Renderer::renderForce(const Force &force, const Point &position, const Shad
     shader.setUniform("model", model);
 
 
-    renderTriangleWise(*CommonModels::arrowModel, shader);
+    renderTriangleWise(*CommonModels::arrowModel(), shader);
 }
 
 

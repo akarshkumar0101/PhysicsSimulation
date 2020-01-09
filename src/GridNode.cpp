@@ -47,11 +47,11 @@ static GraphicsData& horizontalLine(){
     if(first){
         std::vector<float> verts({0,0,1,0});
         std::vector<unsigned int> inds({0,1});
-        vb->createBuffer(verts.data(), verts.size() * sizeof(float));
-        ib->putData(inds.data(), inds.size());
+        vb->allocateBuffer(2,verts);
+        ib->allocateBuffer(inds);
 
         vbl.addElement<float>(2);
-        va->addBuffer(vb, vbl);
+        va->addBufferWithDefaultLayout(vb, vbl);
     }
 
     static GraphicsData horizontalLine(va,ib);

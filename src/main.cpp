@@ -39,8 +39,6 @@ int simulation(){
 
 void testLines(){
     Window window(900,900, "hey window");
-    VertexBufferLayout::initCommonLayouts();
-    CommonModels::initCommonModels();
 
     Shader shader("./resources/shaders/triangle.shader");
 
@@ -73,9 +71,6 @@ void testLines(){
 void testWindowAndNode(){
     auto window = std::make_shared<Window>(900,900, "hey window");
 
-    VertexBufferLayout::initCommonLayouts();
-    CommonModels::initCommonModels();
-
     auto gridNode = std::make_shared<GridNode> (window, std::pair<unsigned int, unsigned int>({3,3}));
     auto gridNode2 = std::make_shared<GridNode> (window, std::pair<unsigned int, unsigned int>({3,3}));
 
@@ -94,7 +89,6 @@ void testWindowAndNode(){
             gridNode2->setChild(triangleNode, {x,y});
         }
     }
-
 
     glClearColor(0.0,0.0,0.0,1.0);
     while(!window->shouldClose()){

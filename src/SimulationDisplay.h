@@ -39,9 +39,6 @@ public:
     SimulationDisplay(PhysicsSimulation& simulation):camera(glm::vec3(0.0, 0.0, 15.0), glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, 1.0, 0.0)), simulation(simulation){
         window = new Window(500,500,"new window dog");
 
-        VertexBufferLayout::initCommonLayouts();
-        CommonModels::initCommonModels();
-
         renderer = new Renderer(true, false);
         basicShader = new Shader("resources/shaders/basic.shader");
 
@@ -98,7 +95,7 @@ private:
         for (int i = 0; i < modelDatas.size(); i++) {
             const RigidBody& model = simulation.models()[i];
 
-            renderer->renderRigidBody(*modelDatas[i], model, *CommonModels::cubeModel, *basicShader);
+            renderer->renderRigidBody(*modelDatas[i], model, *CommonModels::cubeModel(), *basicShader);
             for(PointMass pm: model.pointMasses()) {
                 //Point r = model.transformation() * glm::vec4(pm.r(), 1.0);
 //                renderer->renderForce(simulation.forceAt(r), r, *basicShader);
