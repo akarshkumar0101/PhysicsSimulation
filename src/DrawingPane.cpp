@@ -2,7 +2,7 @@
 // Created by Akarsh Kumar on 1/4/20.
 //
 
-#include "DrawingNode.h"
+#include "DrawingPane.h"
 #include "GraphicsBuffer.h"
 
 
@@ -11,6 +11,26 @@ static auto drawingShader(){
     return drawingShader;
 }
 
+void Graphics::clear(){
+    static bool first = true;
+    static auto vb = std::make_shared<VertexBuffer>();
+    static auto va = std::make_shared<VertexArray>();
+    static auto ib = std::make_shared<IndexBuffer>();
+    if(first){
+        first = false;
+        vb->allocateBuffer(4, std::vector<float>({-1,-1,-1,1,1,-1,1,1}));
+        va->addBufferWithShaderAttributes(vb, *VertexBufferLayout::coordinate2DOnlyLayout(), *drawingShader(), {"vPos"});
+
+        ib->allocateBuffer(std::vector<unsigned int>({0,1,2,1,2,3}));
+    }
+
+    drawingShader()->bind();
+    drawingShader()->setUniform("transform", glm::mat4(1.0));
+    va->bind();
+    ib->bind();
+
+    glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,nullptr);
+}
 
 void Graphics::drawPoint(float x, float y) {
     static bool first = true;
@@ -76,7 +96,7 @@ static auto computeCircleVertices(int increments){
     return vector;
 }
 
-#define CIRCLE_NUM_PARTITIONS 100
+#define CIRCLE_NUM_PARTITIONS 12
 
 void Graphics::fillCircle(float cx, float cy, float r){
     static bool first = true;
@@ -97,16 +117,24 @@ void Graphics::fillCircle(float cx, float cy, float r){
     va->bind();
     glDrawArrays(GL_TRIANGLE_FAN,0,CIRCLE_NUM_PARTITIONS+1);
 }
-void Graphics::setColor(float r, float g, float b, float a) {
-    drawingShader()->setUniform("color", glm::vec4(r,g,b,a));
+void Graphics::setColor(const Color& color) {
+    drawingShader()->setUniform("color", glm::vec4(color.r, color.g, color.b,color.a));
 }
 
-DrawingNode::DrawingNode(std::shared_ptr<Window> window, DrawingFunction drawingFunction): Node(window), mDrawingFunction(drawingFunction) {
+DrawingPane::DrawingPane(std::shared_ptr<Window> window, DrawingFunction drawingFunction): Pane(window), mDrawingFunction(drawingFunction) {
 }
 
-void DrawingNode::render(const Viewport &viewport) {
+void DrawingPane::render(const Viewport &viewport) {
     viewport.bind();
     mDrawingFunction(mGraphics);
 }
 
 
+Color::Color(float r, float g, float b, float a):r(r),g(g),b(b),a(a) {
+}
+Color Color::RED(1.0,0.0,0.0,1.0);
+Color Color::GREEN(0.0,1.0,0.0,1.0);
+Color Color::BLUE(0.0,0.0,1.0,1.0);
+Color Color::WHITE(1.0,1.0,1.0,1.0);
+Color Color::BLACK(0.0,0.0,0.0,1.0);
+Color Color::GRAY(0.5,0.5,0.5,1.0);

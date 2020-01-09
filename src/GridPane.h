@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <utility>
 
-#include "Node.h"
+#include "Pane.h"
 #include "GraphicsBuffer.h"
 
 
@@ -20,19 +20,19 @@ struct pair_hash
     }
 };
 
-class GridNode: public Node {
+class GridPane: public Pane {
 private:
     // numRows, numCols
     std::pair<unsigned int, unsigned int> mGridDimensions;
 
-    std::unordered_map<std::pair<unsigned int, unsigned int>, std::shared_ptr<Node>, pair_hash> mGridChildren;
+    std::unordered_map<std::pair<unsigned int, unsigned int>, std::shared_ptr<Pane>, pair_hash> mGridChildren;
 
     Viewport viewportForChild(std::pair<unsigned int, unsigned int> gridLocation, const Viewport& viewport);
 
 public:
-    GridNode(std::shared_ptr<Window> window, std::pair<unsigned int, unsigned int> gridDimensions);
+    GridPane(std::shared_ptr<Window> window, std::pair<unsigned int, unsigned int> gridDimensions);
 
-    void setChild(std::shared_ptr<Node> node, std::pair<unsigned int, unsigned int> gridLocation);
+    void setChild(std::shared_ptr<Pane> node, std::pair<unsigned int, unsigned int> gridLocation);
     void removeChild(std::pair<unsigned int, unsigned int> gridLocation);
 
     void render(const Viewport& viewport) override;

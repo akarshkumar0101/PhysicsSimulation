@@ -2,7 +2,7 @@
 // Created by Akarsh Kumar on 1/3/20.
 //
 
-#include "Node.h"
+#include "Pane.h"
 
 Viewport::Viewport(): Viewport(0,0,0,0) {
 }
@@ -10,17 +10,17 @@ Viewport::Viewport(const int x, const int y, const int width, const int height):
 }
 
 
-Node::Node(std::shared_ptr<Window>window): mWindow(window){
+Pane::Pane(std::shared_ptr<Window>window): mWindow(window){
 }
 
-void Node::addChild(std::shared_ptr<Node> node) {
+void Pane::addChild(std::shared_ptr<Pane> node) {
     mChildren.insert(node);
 }
-void Node::removeChild(std::shared_ptr<Node> node) {
+void Pane::removeChild(std::shared_ptr<Pane> node) {
     mChildren.erase(node);
 }
 
-Node::~Node() {
+Pane::~Pane() {
 }
 
 

@@ -30,17 +30,17 @@ public:
 
 class Window;
 
-class Node {
+class Pane {
 private:
     std::shared_ptr<Window> mWindow;
-    std::unordered_set<std::shared_ptr<Node> > mChildren;
+    std::unordered_set<std::shared_ptr<Pane> > mChildren;
 
 protected:
-    void addChild(std::shared_ptr<Node> node);
-    void removeChild(std::shared_ptr<Node> node);
+    void addChild(std::shared_ptr<Pane> node);
+    void removeChild(std::shared_ptr<Pane> node);
 
 public:
-    Node(std::shared_ptr<Window> window);
-    virtual ~Node();
+    Pane(std::shared_ptr<Window> window);
+    virtual ~Pane();
     virtual void render(const Viewport& viewport) = 0;
 };

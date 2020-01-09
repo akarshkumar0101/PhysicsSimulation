@@ -99,7 +99,7 @@ void Window::getCursorPosition(double &xPos, double& yPos) {
 }
 
 
-void Window::setRoot(std::shared_ptr<Node> root){
+void Window::setRoot(std::shared_ptr<Pane> root){
     mRoot = root;
 }
 void Window::render(){

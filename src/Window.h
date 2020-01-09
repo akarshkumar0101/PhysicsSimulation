@@ -8,15 +8,15 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Node.h"
+#include "Pane.h"
 
 
-class Node;
+class Pane;
 
 class Window {
 private:
     GLFWwindow* mWindow;
-    std::shared_ptr<Node> mRoot = nullptr;
+    std::shared_ptr<Pane> mRoot = nullptr;
 
     void init();
 
@@ -30,7 +30,7 @@ public:
     void setShouldClose(bool shouldClose);
     bool shouldClose();
 
-    void setRoot(std::shared_ptr<Node> root);
+    void setRoot(std::shared_ptr<Pane> root);
     void render();
 
     void makeContextCurrent();

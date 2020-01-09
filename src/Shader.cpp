@@ -96,17 +96,16 @@ void Shader::unbind() const {
     glUseProgram(0);
 }
 
-unsigned int Shader::shaderProgramID() const{
-    return mShaderProgramID;
-}
-
 void Shader::setUniform(const std::string& name, const float val) const {
+    bind();
     glUniform1f(getUniformLocation((name)), val);
 }
 void Shader::setUniform(const std::string& name, const glm::mat4& mat) const {
+    bind();
     glUniformMatrix4fv(getUniformLocation(name),1, GL_FALSE, glm::value_ptr(mat));
 }
 void Shader::setUniform(const std::string& name, const glm::vec4& vec) const {
+    bind();
     glUniform4fv(getUniformLocation(name),1,glm::value_ptr(vec));
 }
 

@@ -34,8 +34,6 @@ public:
     void bind() const;
     void unbind() const;
 
-    unsigned int shaderProgramID() const;
-
     void setUniform(const std::string& name, const float val) const;
     void setUniform(const std::string& name, const glm::mat4& mat) const;
     void setUniform(const std::string& name, const glm::vec4& vec) const;

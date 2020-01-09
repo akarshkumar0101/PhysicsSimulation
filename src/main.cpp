@@ -3,9 +3,9 @@
 #include "SimulationDisplay.h"
 #include "RigidBody.h"
 #include "PhysicsSimulation.h"
-#include "TriangleNode.h"
-#include "GridNode.h"
-#include "DrawingNode.h"
+#include "TrianglePane.h"
+#include "GridPane.h"
+#include "DrawingPane.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -70,31 +70,37 @@ void testLines(){
 }
 
 void renderFunction(Graphics& graphics){
-    graphics.setColor(1.0,0.0,0.0,1.0);
+    graphics.setColor(Color::GRAY);
+    graphics.clear();
+
+    graphics.setColor(Color(1.0,0.0,0.0,1.0));
     graphics.drawPoint(0,0);
-    graphics.setColor(1.0,1.0,0.0,1.0);
+    graphics.setColor(Color(1.0,1.0,0.0,1.0));
     graphics.drawLine(-0.5,0,0.5,0.0);
-    graphics.setColor(1.0,0.0,1.0,1.0);
+    graphics.setColor(Color(1.0,0.0,1.0,1.0));
     graphics.drawLine(0,-0.5,0.0,0.5);
-    graphics.setColor(0.0,0.0,1.0,1.0);
+    graphics.setColor(Color(0.0,0.0,1.0,1.0));
     graphics.fillTriangle(0.5,0,0,-0.5,1,-0.5);
-    graphics.setColor(0.0,1.0,0.0,1.0);
+    graphics.setColor(Color(0.0,1.0,0.0,1.0));
     graphics.fillCircle(0.5,0.5,0.5);
+
+
 }
 
 void testWindowAndNode(){
     auto window = std::make_shared<Window>(900,900, "hey window");
 
-    auto gridNode = std::make_shared<GridNode> (window, std::pair<unsigned int, unsigned int>({3,3}));
-    auto gridNode2 = std::make_shared<GridNode> (window, std::pair<unsigned int, unsigned int>({3,3}));
+    auto gridNode = std::make_shared<GridPane> (window, std::pair<unsigned int, unsigned int>({3, 3}));
+    auto gridNode2 = std::make_shared<GridPane> (window, std::pair<unsigned int, unsigned int>({3, 3}));
 
-    auto drawingNode = std::make_shared<DrawingNode> (window, renderFunction);
+    auto drawingNode = std::make_shared<DrawingPane> (window, renderFunction);
+    auto drawingNode2 = std::make_shared<DrawingPane> (window, renderFunction);
 
     window->setRoot(gridNode);
 
     for(int x=0;x<3; x++){
         for(int y=0; y<3; y++){
-            auto triangleNode = std::make_shared<TriangleNode>(window);
+            auto triangleNode = std::make_shared<TrianglePane>(window);
             gridNode->setChild(triangleNode, {x,y});
         }
     }
@@ -102,10 +108,11 @@ void testWindowAndNode(){
     gridNode->setChild(drawingNode, {0,0});
     for(int x=0;x<3; x++){
         for(int y=0; y<3; y++){
-            auto triangleNode = std::make_shared<TriangleNode>(window);
+            auto triangleNode = std::make_shared<TrianglePane>(window);
             gridNode2->setChild(triangleNode, {x,y});
         }
     }
+    gridNode2->setChild(drawingNode2, {1,0});
 
     glClearColor(0.0,0.0,0.0,1.0);
     while(!window->shouldClose()){

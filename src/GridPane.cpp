@@ -2,14 +2,14 @@
 // Created by Akarsh Kumar on 1/3/20.
 //
 
-#include "GridNode.h"
+#include "GridPane.h"
 
 
-GridNode::GridNode(std::shared_ptr<Window> window, std::pair<unsigned int, unsigned int> gridDimensions): Node(window), mGridDimensions(std::move(gridDimensions)) {
+GridPane::GridPane(std::shared_ptr<Window> window, std::pair<unsigned int, unsigned int> gridDimensions): Pane(window), mGridDimensions(std::move(gridDimensions)) {
 }
 
 
-Viewport GridNode::viewportForChild(std::pair<unsigned int, unsigned int> gridLocation, const Viewport& viewport) {
+Viewport GridPane::viewportForChild(std::pair<unsigned int, unsigned int> gridLocation, const Viewport& viewport) {
     int width = viewport.width() / mGridDimensions.first;
     int height = viewport.height() / mGridDimensions.second;
     int x = viewport.x() + (((float) gridLocation.first / mGridDimensions.first) * viewport.width());
@@ -18,18 +18,18 @@ Viewport GridNode::viewportForChild(std::pair<unsigned int, unsigned int> gridLo
     return Viewport(x, y, width, height);
 }
 
-void GridNode::setChild(std::shared_ptr<Node> node, std::pair<unsigned int, unsigned int> gridLocation){
-    Node::addChild(node);
+void GridPane::setChild(std::shared_ptr<Pane> node, std::pair<unsigned int, unsigned int> gridLocation){
+    Pane::addChild(node);
 
     auto it = mGridChildren.find(gridLocation);
     if(it != mGridChildren.end()) { // if child already exists
-        Node::removeChild(it->second);
+        Pane::removeChild(it->second);
     }
     mGridChildren[gridLocation] = node;
     //viewportForChild(gridLocation);
 }
-void GridNode::removeChild(std::pair<unsigned int, unsigned int> gridLocation) {
-    Node::removeChild(mGridChildren[gridLocation]);
+void GridPane::removeChild(std::pair<unsigned int, unsigned int> gridLocation) {
+    Pane::removeChild(mGridChildren[gridLocation]);
     mGridChildren.erase(gridLocation);
 }
 
@@ -80,11 +80,29 @@ static GraphicsData& tempBufferY(){
     return data;
 }
 
-void GridNode::render(const Viewport& viewport) {
+void GridPane::render(const Viewport& viewport) {
+    glm::mat4 iden(1.0);
+    for(auto it: mGridChildren){
+        Viewport childViewport = viewportForChild(it.first,viewport);
+
+        it.second->render(childViewport);
+
+        childViewport.bind();
+
+
+        gridShader().bind();
+        gridShader().setUniform("solidColor", glm::vec4(1.0,0.0,0.0,1.0));
+        glm::mat4 transformp = glm::scale(iden,glm::vec3(0.95f));
+        gridShader().setUniform("transform", transformp);
+
+        tempBuffer().bind();
+        glDrawElements(GL_LINES, tempBuffer().indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
+    }
+
     viewport.bind();
     gridShader().bind();
 
-    glm::mat4 iden(1.0);
+
     gridShader().setUniform("solidColor", glm::vec4(0.0,1.0,0.0,1.0));
     for(int x=1;x<mGridDimensions.first;x++){
         float xVal = ((float)x/mGridDimensions.first)*2.0f-1.0f;
@@ -101,23 +119,6 @@ void GridNode::render(const Viewport& viewport) {
         gridShader().setUniform("transform", trans);
         tempBufferX().bind();
         glDrawElements(GL_LINES, tempBufferX().indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
-    }
-
-    for(auto it: mGridChildren){
-        Viewport childViewport = viewportForChild(it.first,viewport);
-
-        childViewport.bind();
-
-        gridShader().bind();
-        gridShader().setUniform("solidColor", glm::vec4(1.0,0.0,0.0,1.0));
-        glm::mat4 transformp = glm::scale(iden,glm::vec3(0.99f));
-        gridShader().setUniform("transform", transformp);
-
-        tempBuffer().bind();
-        glDrawElements(GL_LINES, tempBuffer().indexBuffer()->count(), GL_UNSIGNED_INT, nullptr);
-
-
-        it.second->render(childViewport);
     }
 }
 

@@ -4,10 +4,10 @@
 
 #include <vector>
 
-#include "Node.h"
+#include "Pane.h"
 #include "GraphicsBuffer.h"
 
-class TriangleNode: public Node {
+class TrianglePane: public Pane {
 private:
     GraphicsData triangleData;
     Shader triangleShader;
@@ -15,7 +15,7 @@ private:
     static std::vector<float> verticies;
     static std::vector<unsigned int> indices;
 public:
-    TriangleNode(std::shared_ptr<Window> window):Node(window), triangleData(verticies, indices), triangleShader("resources/shaders/triangle.shader"){
+    TrianglePane(std::shared_ptr<Window> window): Pane(window), triangleData(verticies, indices), triangleShader("resources/shaders/triangle.shader"){
     }
 
     void render(const Viewport& viewport) override{
