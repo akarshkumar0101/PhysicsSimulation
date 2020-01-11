@@ -15,9 +15,10 @@ add_executable(${PROJECT_NAME}
         src/main.cpp
         #src/testing.cpp
         #src/imguiAndOpenGL.cpp
-        src/math/Vector.h src/math/VectorOps.h src/math/Matrix.h src/math/MatrixOps.h src/RigidBody.h src/PhysicsSimulation.h src/math/Quaternion.h src/Physics.h src/math/QuaternionOps.h src/SimulationDisplay.h src/Shader.h src/Camera.h src/Renderer.h src/GraphicsBuffer.h src/Shader.cpp src/GraphicsBuffer.cpp src/Window.cpp src/Window.h src/Camera.cpp src/Renderer.cpp src/RigidBody.cpp
-        src/Pane.h src/Pane.cpp src/GridPane.cpp src/GridPane.h src/DrawingPane.cpp src/DrawingPane.h
-        src/TrianglePane.cpp src/TrianglePane.h src/ImagePane.cpp src/ImagePane.h src/stb_image.cpp src/Image.cpp src/Image.h)
+        #src/math/Vector.h src/math/VectorOps.h src/math/Matrix.h src/math/MatrixOps.h src/RigidBody.h src/PhysicsSimulation.h src/math/Quaternion.h src/Physics.h src/math/QuaternionOps.h src/SimulationDisplay.h src/Shader.h src/Camera.h src/Renderer.h src/GraphicsBuffer.h src/Shader.cpp src/GraphicsBuffer.cpp src/Window.cpp src/Window.h src/Camera.cpp src/Renderer.cpp src/RigidBody.cpp
+        #src/Pane.h src/Pane.cpp src/GridPane.cpp src/GridPane.h src/DrawingPane.cpp src/DrawingPane.h
+        #src/TrianglePane.cpp src/TrianglePane.h src/ImagePane.cpp src/ImagePane.h src/stb_image.cpp src/Image.cpp src/Image.h
+        )
 
 
 
