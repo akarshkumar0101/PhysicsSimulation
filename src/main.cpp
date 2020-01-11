@@ -158,10 +158,10 @@ void testWindowAndNode(){
 
 }
 int main() {
-    testWindowAndNode();
+//    testWindowAndNode();
 //    testingOpenGL();
 //    try{
-//        simulation();
+        simulation();
 //    }catch(std::string exp){
 //        std::cout<<exp<<std::endl;
 //    }

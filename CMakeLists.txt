@@ -10,22 +10,28 @@ find_package(OpenGL REQUIRED)
 
 
 add_executable(${PROJECT_NAME}
-        #Libraries/GL/glad.c
-        #${IMGUI_SRC}
         src/main.cpp
         #src/testing.cpp
         #src/imguiAndOpenGL.cpp
-        src/math/Vector.h src/math/VectorOps.h src/math/Matrix.h src/math/MatrixOps.h src/RigidBody.h src/PhysicsSimulation.h src/math/Quaternion.h src/Physics.h src/math/QuaternionOps.h src/SimulationDisplay.h src/Shader.h src/Camera.h src/Renderer.h src/GraphicsBuffer.h src/Shader.cpp src/GraphicsBuffer.cpp src/Window.cpp src/Window.h src/Camera.cpp src/Renderer.cpp src/RigidBody.cpp
-        src/Pane.h src/Pane.cpp src/GridPane.cpp src/GridPane.h src/DrawingPane.cpp src/DrawingPane.h
-        src/TrianglePane.cpp src/TrianglePane.h src/ImagePane.cpp src/ImagePane.h src/stb_image.cpp src/Image.cpp src/Image.h)
+
+        src/RigidBody.h src/RigidBody.cpp
+        src/Physics.h
+        src/PhysicsSimulation.h
+
+        )
 
 
-
+target_include_directories(PhysicsSimulation PRIVATE ${LIB_ROOT}/GLM/glm/)
 
 target_include_directories(PhysicsSimulation PRIVATE ${LIB_ROOT}/Glad/glad/include/)
-target_include_directories(PhysicsSimulation PRIVATE ${LIB_ROOT}/GLM/glm/)
+target_link_libraries(PhysicsSimulation ${LIB_ROOT}/Glad/libGlad.a)
+
 target_include_directories(PhysicsSimulation PRIVATE ${LIB_ROOT}/ImGUI/)
 target_include_directories(PhysicsSimulation PRIVATE ${LIB_ROOT}/ImGUI/examples/)
+target_link_libraries(PhysicsSimulation ${LIB_ROOT}/ImGUI/libImGUI.a)
+
+
+
 
 target_include_directories(PhysicsSimulation PUBLIC ${OPENGL_INCLUDE_DIR})
 
@@ -33,7 +39,8 @@ target_link_libraries(PhysicsSimulation glfw)
 target_link_libraries(PhysicsSimulation ${OPENGL_gl_LIBRARY})
 target_link_libraries(PhysicsSimulation ${OPENGL_glu_LIBRARY})
 
-target_link_libraries(PhysicsSimulation ${LIB_ROOT}/Glad/libGlad.a)
-target_link_libraries(PhysicsSimulation ${LIB_ROOT}/ImGUI/libImGUI.a)
 
+
+target_include_directories(PhysicsSimulation PRIVATE ${LIB_ROOT}/../LibAKCpp/include/)
+target_link_libraries(PhysicsSimulation ${LIB_ROOT}/../LibAKCpp/cmake-build-debug/libak.a)
 
