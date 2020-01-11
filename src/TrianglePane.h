@@ -17,6 +17,8 @@ private:
 public:
     TrianglePane(std::shared_ptr<Window> window): Pane(window), triangleData(verticies, indices), triangleShader("resources/shaders/triangle.shader"){
     }
+    ~TrianglePane(){
+    }
 
     void render(const Viewport& viewport) override{
         viewport.bind();

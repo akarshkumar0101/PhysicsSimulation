@@ -6,17 +6,18 @@
 
 #include <string>
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "Pane.h"
 
-
+struct GLFWwindow;
+struct GLFWmonitor;
 class Pane;
 
 class Window {
 private:
     GLFWwindow* mWindow;
-    std::shared_ptr<Pane> mRoot = nullptr;
+public:
+
+    std::shared_ptr<Pane> mRoot;
 
     void init();
 

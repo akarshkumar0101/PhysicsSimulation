@@ -13,6 +13,7 @@
 
 #include "Shader.h"
 #include "RigidBody.h"
+#include "Image.h"
 
 enum BufferUsage{
     STATIC, DYNAMIC
@@ -136,4 +137,19 @@ namespace CommonModels{
     std::shared_ptr<GraphicsData> cubeModel();
     std::shared_ptr<GraphicsData> arrowModel();
 }
+
+
+
+class Texture{
+private:
+    const unsigned int mBufferID;
+public:
+    Texture();
+    ~Texture();
+
+    void allocateTexture(const Image& image);
+
+    void bind();
+    void unbind();
+};
 

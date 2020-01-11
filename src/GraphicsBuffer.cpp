@@ -4,6 +4,7 @@
 
 #include <fstream>
 #include "GraphicsBuffer.h"
+#include "Image.h"
 
 static GLenum toGLBufferUsage(BufferUsage usage){
     switch(usage) {
@@ -13,10 +14,13 @@ static GLenum toGLBufferUsage(BufferUsage usage){
 }
 
 static unsigned int generateBufferOpenGLBuffer(){ unsigned int bufferID; glGenBuffers(1, &bufferID); return bufferID; }
-
-GraphicsBuffer::GraphicsBuffer():mBufferID(generateBufferOpenGLBuffer()), mSize(0), mCount(0) {}
+static int bufferCountf = 0;
+GraphicsBuffer::GraphicsBuffer():mBufferID(generateBufferOpenGLBuffer()), mSize(0), mCount(0) {
+    bufferCountf++;
+}
 GraphicsBuffer::~GraphicsBuffer(){
     glDeleteBuffers(1, &mBufferID);
+    bufferCountf--;
 }
 void GraphicsBuffer::allocateBuffer(const unsigned int count, const size_t size, const void* data, BufferUsage usage){
     bind();
@@ -42,7 +46,6 @@ void VertexBuffer::allocateBuffer(const unsigned int count, const std::vector<fl
 void IndexBuffer::allocateBuffer(const std::vector<unsigned int> &indexData, BufferUsage usage) {
     GraphicsBuffer::allocateBuffer(indexData.size(), indexData.size()*sizeof(unsigned int), indexData.data(), usage);
 }
-
 
 size_t VertexBufferElement::sizeofType(unsigned int type){
     switch(type){
@@ -248,4 +251,42 @@ namespace CommonModels{
         static auto gd = std::make_shared<GraphicsData>("resources/models/arrow.obj");
         return gd;
     }
+}
+
+
+static unsigned int generateTexture(){
+    unsigned int texture;
+    glGenTextures(1, &texture);
+    return texture;
+}
+
+Texture::Texture(): mBufferID(generateTexture()) {
+    glBindTexture(GL_TEXTURE_2D, mBufferID); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+}
+
+Texture::~Texture() {
+    glDeleteTextures(1, &mBufferID);
+}
+void Texture::allocateTexture(const Image& image){
+    if(image.getNumColorChannels() == 3){
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image.getWidth(), image.getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, image.getDataPtr());
+    }
+    else if(image.getNumColorChannels() == 4){
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.getWidth(), image.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.getDataPtr());
+    }
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void Texture::bind() {
+    glBindTexture(GL_TEXTURE_2D, mBufferID);
+}
+
+void Texture::unbind() {
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

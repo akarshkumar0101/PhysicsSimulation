@@ -6,10 +6,12 @@
 #include "TrianglePane.h"
 #include "GridPane.h"
 #include "DrawingPane.h"
+#include "ImagePane.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 
 int simulation(){
     RigidBody model;
@@ -96,6 +98,14 @@ void testWindowAndNode(){
     auto drawingNode = std::make_shared<DrawingPane> (window, renderFunction);
     auto drawingNode2 = std::make_shared<DrawingPane> (window, renderFunction);
 
+    auto image = std::make_shared<Image>("/Users/akarshkumar0101/Pictures/Wallpapers/space galxy with man.jpg");
+    auto image1 = std::make_shared<Image>("/Users/akarshkumar0101/Pictures/Wallpapers/daylight-environment-forest-idyllic-459225.jpg");
+    auto image2 = std::make_shared<Image>("resources/img/awesomeface.png");
+
+    auto imageNode = std::make_shared<ImagePane> (window, *image);
+    auto imageNode2 = std::make_shared<ImagePane> (window, *image2);
+
+
     window->setRoot(gridNode);
 
     for(int x=0;x<3; x++){
@@ -106,6 +116,7 @@ void testWindowAndNode(){
     }
     gridNode->setChild(gridNode2, {1,1});
     gridNode->setChild(drawingNode, {0,0});
+    gridNode->setChild(imageNode, {2, 2});
     for(int x=0;x<3; x++){
         for(int y=0; y<3; y++){
             auto triangleNode = std::make_shared<TrianglePane>(window);
@@ -113,19 +124,37 @@ void testWindowAndNode(){
         }
     }
     gridNode2->setChild(drawingNode2, {1,0});
+    gridNode2->setChild(imageNode, {0, 2});
+    gridNode2->setChild(imageNode2, {1, 2});
 
     glClearColor(0.0,0.0,0.0,1.0);
+
+    int fps = 0;
+    double pt = glfwGetTime();
+    int sec = (int) pt;
     while(!window->shouldClose()){
+        double t = glfwGetTime();
+        if((int)t != sec){
+            sec = (int)t;
+//            std::cout<<fps<<std::endl;
+            if(sec%2==0){
+                imageNode->setImage(*image1);
+            }
+            else{
+                imageNode->setImage(*image);
+            }
+            fps = 0;
+        }
+        fps++;
+        pt = t;
+
         glClear(GL_COLOR_BUFFER_BIT);
 
-//        triangleNode.render();
         window->render();
 
         window->swapBuffers();
         window->pollEvents();
     }
-
-
 
 }
 int main() {

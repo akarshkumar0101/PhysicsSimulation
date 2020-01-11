@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "Window.h"
+#include "glad/glad.h"
 
 class Viewport {
 private:
@@ -32,7 +33,7 @@ class Window;
 
 class Pane {
 private:
-    std::shared_ptr<Window> mWindow;
+    std::weak_ptr<Window> mWindow;
     std::unordered_set<std::shared_ptr<Pane> > mChildren;
 
 protected:
